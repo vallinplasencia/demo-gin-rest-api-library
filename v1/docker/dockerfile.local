@@ -1,0 +1,23 @@
+# Antes de crear la imagen docker correr 'go mod vendor'
+FROM golang:1.16.7-alpine3.14 as build
+
+ENV CGO_ENABLED=0 GOFLAGS=-mod=vendor
+
+WORKDIR /app
+
+COPY go.mod ./
+COPY . ./
+
+# RUN go build -o /app/server ./cmd/server/main.go
+RUN go build -o /server ./cmd/server/
+
+# new stage
+FROM alpine:3.14
+
+LABEL maintainer="Vallin Plasencia Valdes <vallin.plasencia@gmail.com>"
+
+WORKDIR /
+
+COPY --from=build /server /server
+
+CMD ["./server" ]

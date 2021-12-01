@@ -1,0 +1,31 @@
+FROM golang:1.16.7-alpine3.14 as build
+
+# ARG GITHUB_TOKEN
+# ARG GITHUB_REPO_PRIVATE
+
+# RUN apk add --no-cache git && \
+#     go env -w GOPRIVATE=github.com/${GITHUB_REPO_PRIVATE} && \
+#     git config --global url."https://${GITHUB_TOKEN}@github.com".insteadOf "https://github.com"
+# ENV GOPROXY "direct"
+# ENV GOSUMDB "off"
+
+WORKDIR /app
+
+COPY go.mod ./
+RUN go mod download
+
+COPY . ./
+
+# RUN go build -o $GOPATH/bin/server ./cmd/server/
+RUN go build -o /server ./v1/cmd/server/
+
+# new stage
+FROM alpine:latest3.14
+
+LABEL maintainer="Vallin Plasencia Valdes <vallin.plasencia@gmail.com>"
+
+WORKDIR /
+
+COPY --from=build /server /server
+
+CMD ["./server"]
