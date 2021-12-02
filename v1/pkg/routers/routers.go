@@ -10,7 +10,9 @@ import (
 func InitRouters(eng *gin.Engine, h *aphandv1.Handlers) {
 	apiv1 := eng.Group("/api/v1")
 	{
-		apiv1.POST("/books", h.Book.PostBook)
+		apiv1.POST("/books", h.Books.PostCreateBook)
+		apiv1.POST("/accounts", h.Accounts.PostCreateAccount)
+		apiv1.POST("/login", h.Accounts.PostLogin)
 	}
 
 }

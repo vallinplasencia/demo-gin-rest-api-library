@@ -27,7 +27,7 @@ func (r *categoriesRepo) Add(d *apmodelsv1.Category) (string, error) {
 	return strconv.FormatInt(id, 10), nil
 }
 
-// Add add a new item
+// Find find a category by id
 func (r *categoriesRepo) Find(id string) (*apmodelsv1.Category, error) {
 	row := r.db.QueryRow("SELECT id,name,description,created_at,updated_at FROM categories WHERE id=?", id)
 	var c apmodelsv1.Category

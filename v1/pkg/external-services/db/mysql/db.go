@@ -13,6 +13,7 @@ import (
 type DB struct {
 	books      apdbabstract.BooksRepo
 	categories apdbabstract.CategoriesRepo
+	accounts   apdbabstract.AccountsRepo
 }
 
 func New(c *config) (apdbabstract.DB, error) {
@@ -47,9 +48,13 @@ func New(c *config) (apdbabstract.DB, error) {
 	rCategories := &categoriesRepo{
 		db: dba,
 	}
+	rAccounts := &accountsRepo{
+		db: dba,
+	}
 	db := &DB{
 		books:      rBooks,
 		categories: rCategories,
+		accounts:   rAccounts,
 	}
 	return db, nil
 }
@@ -59,4 +64,7 @@ func (db *DB) Books() apdbabstract.BooksRepo {
 }
 func (db *DB) Categories() apdbabstract.CategoriesRepo {
 	return db.categories
+}
+func (db *DB) Accounts() apdbabstract.AccountsRepo {
+	return db.accounts
 }

@@ -4,4 +4,5 @@ package abstract
 type DB interface {
 	Books() BooksRepo
 	Categories() CategoriesRepo
+	Accounts() AccountsRepo
 }

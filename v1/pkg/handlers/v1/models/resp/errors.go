@@ -14,14 +14,22 @@ const (
 	CodeInternalError
 	CodeInvalidArgument
 	CodeNotFoundCategory
+	CodeConflictEmail
+	CodeConflictUsername
+	CodeNotFoundUser
+	CodeIncorrectPassword
 )
 
 var msgs = map[CodeType]string{
-	CodeIndeterminate:    "",
-	CodeOK:               "ok",
-	CodeInternalError:    "internal error",
-	CodeInvalidArgument:  "invalid arguments",
-	CodeNotFoundCategory: "category not found",
+	CodeIndeterminate:     "",
+	CodeOK:                "ok",
+	CodeInternalError:     "internal error",
+	CodeInvalidArgument:   "invalid arguments",
+	CodeNotFoundCategory:  "category not found",
+	CodeConflictEmail:     "email exist",
+	CodeConflictUsername:  "username exist",
+	CodeNotFoundUser:      "user not found",
+	CodeIncorrectPassword: "password incorrect",
 }
 
 // GetMsgError retorna el mensaje de error asociado al codigo
