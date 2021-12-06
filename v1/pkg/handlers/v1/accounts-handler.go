@@ -2,6 +2,7 @@ package v1
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -20,7 +21,7 @@ import (
 
 // AccountsHandler incoming request for accounts
 type AccountsHandler struct {
-	*Base
+	*base
 }
 
 // PostCreateAccount add a new account
@@ -29,10 +30,12 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 	var e error
 	b := aphv1req.CreateAccount{}
 
-	if e = c.ShouldBindWith(&b, binding.JSON); e != nil {
+	if e = c.ShouldBindWith(&b, binding.FormMultipart); e != nil {
 		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e)
 		return
 	}
+	// SOLO simula la generacion del username. NO usar en production
+	username := h.generateUsername(b.Email)
 	var (
 		outAccountByEmail    apv1models.Account
 		outAccountByUsername apv1models.Account
@@ -44,7 +47,7 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 	go h.findAccountByEmail(b.Email, conc, &outAccountByEmail)
 	// account username
 	totalReqConc++
-	go h.findAccountByUsername(b.Username, conc, &outAccountByUsername)
+	go h.findAccountByUsername(username, conc, &outAccountByUsername)
 
 	for i := 0; i < totalReqConc; i++ {
 		if cData := <-conc; cData != nil && cData.Err != nil {
@@ -57,21 +60,28 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 		}
 	}
 	if len(outAccountByEmail.Email) != 0 {
-		resp.sendNotFound(aphv1resp.CodeConflictEmail, errors.New("email exist"))
+		resp.send(http.StatusConflict, aphv1resp.CodeConflictEmail, errors.New("email exist"))
 		return
 	}
 	if len(outAccountByUsername.Username) != 0 {
-		resp.sendNotFound(aphv1resp.CodeConflictUsername, errors.New("username exist"))
+		resp.send(http.StatusConflict, aphv1resp.CodeConflictUsername, errors.New("username exist"))
 		return
 	}
-	// save on db
-	item := h.toModelAccountFromRequest(&b)
-	item.Password, e = apauth.GeneratePassword([]byte(b.Password))
+	// save avatar
+	pathInAvatar, e := h.saveUploadFile(avatarDirectoryIn, b.Avatar)
 	if e != nil {
 		resp.sendInternalError(aphv1resp.CodeInternalError, e)
 		return
 	}
-	id, e := h.DB.Accounts().Add(item)
+	// generate password
+	hashPass, e := apauth.GeneratePassword([]byte(b.Password))
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e)
+		return
+	}
+	item := h.toModelAccountFromRequest(&b, username, hashPass, pathInAvatar)
+	// save on db
+	id, e := h.db.Accounts().Add(item)
 
 	if e != nil {
 		resp.sendInternalError(aphv1resp.CodeInternalError, e)
@@ -84,7 +94,7 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	resp := response{c: c, env: h.env}
 	var e error
-	b := aphv1req.LoginUser{}
+	b := aphv1req.Login{}
 
 	if e = c.ShouldBindWith(&b, binding.JSON); e != nil {
 		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e)
@@ -93,13 +103,12 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	usernameOrEmail := b.UsernameOrEmail
 	var acc *apv1models.Account
 	if strings.Contains(usernameOrEmail, "@") {
-		acc, e = h.DB.Accounts().FindByEmail(usernameOrEmail)
+		acc, e = h.db.Accounts().FindByEmail(usernameOrEmail)
 	} else {
-		acc, e = h.DB.Accounts().FindByUsername(usernameOrEmail)
+		acc, e = h.db.Accounts().FindByUsername(usernameOrEmail)
 	}
 	if e != nil {
-		// sino se encuentra el username or email
-		if e == apdbabstract.ErrorNoItems {
+		if e == apdbabstract.ErrorNoItems { // not found username or email
 			resp.sendNotFound(aphv1resp.CodeNotFoundUser, e)
 			return
 		} else {
@@ -111,19 +120,70 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 		resp.send(http.StatusUnauthorized, aphv1resp.CodeIncorrectPassword, e)
 		return
 	}
+	deviceID := aputil.RandString() // identifica al dispositvo desde el q se hizo login
+	// generating access-token(jwt) adn refresh-token
+	token, e := h.token.Create(acc)
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e)
+		return
+	}
+	ua := parseUserAgent(c.Request.UserAgent())
+	ip := c.ClientIP()
+	now := time.Now().UTC().Unix()
+	// sessiones creadas por el usuario al hacer login.
+	// util para seguridad al generar un nuevo access-token a partir del refresh-token
+	sess := apv1models.Session{
+		ID:                         "",
+		UserID:                     acc.ID,
+		RefreshToken:               token.RefreshToken,
+		DeviceID:                   deviceID,
+		UserAgentStr:               ua.String,
+		UserAgent:                  ua.Name,
+		Platform:                   ua.OS,
+		IP:                         ip,
+		Location:                   aputil.GetLocationFromIP(ip),
+		LastAccessTokenGeneratedAt: now,
+		CreatedAt:                  now,
+	}
+	_, e = h.db.Sessions().Add(&sess)
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e)
+		return
+	}
+	resp.sendOK(&aphv1resp.Login{
+		AuthTwoFactor: false,
+		Token:         &aphv1resp.Token{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken},
+		Fullname:      acc.Fullname,
+		Avatar:        acc.Avatar,
+		DeviceID:      deviceID,
+	})
 }
 
 // === conv === //
 
-func (h *AccountsHandler) toModelAccountFromRequest(d *aphv1req.CreateAccount) *apv1models.Account {
+func (h *AccountsHandler) toModelAccountFromRequest(d *aphv1req.CreateAccount, username, hashPasword, pathInAvatar string) *apv1models.Account {
 	now := time.Now().UTC().Unix()
-	return &apv1models.Account{
-		ID:       "",
-		Fullname: d.Fullname,
-		Email:    d.Email,
-		Username: d.Username,
-		// Password:  d.Password,
-		CreatedAt: now,
-		UpdatedAt: now,
+	roles := []apv1models.RoleType{apv1models.RoleUser}
+	if d.Email == "vallin.plasencia@gmail.com" { // simular un usuario de admin
+		roles = []apv1models.RoleType{apv1models.RoleUser, apv1models.RoleAdmin}
 	}
+	return &apv1models.Account{
+		ID:        "",
+		Fullname:  d.Fullname,
+		Email:     d.Email,
+		Username:  username,
+		Password:  hashPasword,
+		Roles:     roles,
+		Avatar:    pathInAvatar,
+		CreatedAt: now,
+		UpdatedAt: 0,
+	}
+}
+
+// generateUsername simula la generacion de un username "UNICO" a partir del email.
+//
+// NO usar en produccion
+func (h *AccountsHandler) generateUsername(email string) (username string) {
+	a := email[:strings.Index(email, "@")]
+	return fmt.Sprintf("%s_%s", a, strings.ToLower(aputil.RandStringn(5)))
 }

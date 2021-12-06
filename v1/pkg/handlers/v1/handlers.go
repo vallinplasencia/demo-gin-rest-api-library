@@ -3,7 +3,9 @@ package v1
 import (
 	"github.com/kelseyhightower/envconfig"
 
+	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
+	apstoreabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/abstract"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
 )
 
@@ -13,16 +15,18 @@ type Handlers struct {
 	Accounts *AccountsHandler
 }
 
-func New(c *config, db apdbabstract.DB) *Handlers {
-	base := &Base{
-		DB:  db,
-		env: c.Env,
+func New(c *config, db apdbabstract.DB, authToken apauthtokenabstract.Token, store apstoreabstract.Store) *Handlers {
+	base := &base{
+		db:         db,
+		env:        c.Env,
+		token:      authToken,
+		storeFiles: store,
 	}
 	books := &BookHandler{
-		Base: base,
+		base: base,
 	}
 	accounts := &AccountsHandler{
-		Base: base,
+		base: base,
 	}
 	return &Handlers{
 		Books:    books,

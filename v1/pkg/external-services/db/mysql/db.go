@@ -10,10 +10,16 @@ import (
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
 )
 
+const accountsTable string = "accounts"
+const sessionsTable string = "sessions"
+const categoriesTable string = "categories"
+const booksTable string = "books"
+
 type DB struct {
 	books      apdbabstract.BooksRepo
 	categories apdbabstract.CategoriesRepo
 	accounts   apdbabstract.AccountsRepo
+	sessions   apdbabstract.SessionsRepo
 }
 
 func New(c *config) (apdbabstract.DB, error) {
@@ -51,10 +57,14 @@ func New(c *config) (apdbabstract.DB, error) {
 	rAccounts := &accountsRepo{
 		db: dba,
 	}
+	rSessions := &sessionsRepo{
+		db: dba,
+	}
 	db := &DB{
 		books:      rBooks,
 		categories: rCategories,
 		accounts:   rAccounts,
+		sessions:   rSessions,
 	}
 	return db, nil
 }
@@ -67,4 +77,7 @@ func (db *DB) Categories() apdbabstract.CategoriesRepo {
 }
 func (db *DB) Accounts() apdbabstract.AccountsRepo {
 	return db.accounts
+}
+func (db *DB) Sessions() apdbabstract.SessionsRepo {
+	return db.sessions
 }

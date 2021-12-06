@@ -14,6 +14,7 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
+	// app's head
 	s := apserver.New()
 	s.Run()
 

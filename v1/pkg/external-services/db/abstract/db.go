@@ -5,4 +5,5 @@ type DB interface {
 	Books() BooksRepo
 	Categories() CategoriesRepo
 	Accounts() AccountsRepo
+	Sessions() SessionsRepo
 }

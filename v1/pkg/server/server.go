@@ -11,7 +11,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	apauthtoken "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/dgrijalva"
 	apdbclient "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/mysql"
+	apstoreabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/abstract"
+	apstorelocalclient "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/local"
+	apstores3client "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/s3"
 	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1"
 	aprouter "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/routers"
 )
@@ -30,7 +34,7 @@ type Server struct {
 func New() *Server {
 	projectName := "LIBRARY"
 
-	// server
+	// server http-https
 	serverConf, e := ConfigFromEnv(projectName)
 	we("unable read server environment", e)
 
@@ -40,11 +44,31 @@ func New() *Server {
 	db, e := apdbclient.New(dbConf)
 	we("unable configurate db client", e)
 
-	// handlers
+	// token: access-token(jwt) and refresh token auth
+	tokenConf, e := apauthtoken.ConfigFromEnv(projectName)
+	we("unable read auth token environment", e)
+	token, e := apauthtoken.New(tokenConf)
+	we("unable configurate auth token", e)
+
+	var storeFiles apstoreabstract.Store
+	if serverConf.StoreUploadedFilesMode == StoreAwsS3 {
+		// store upload files on aws-s3
+		storeAWSS3Conf, e := apstores3client.ConfigFromEnv(projectName)
+		we("unable read store aws-s3 environment", e)
+		storeFiles, e = apstores3client.New(storeAWSS3Conf)
+		we("unable configurate store aws-s3 client", e)
+	} else {
+		// store upload files on files-system-local
+		storeLocalConf, e := apstorelocalclient.ConfigFromEnv(projectName)
+		we("unable read store files-system-local environment", e)
+		storeFiles, e = apstorelocalclient.New(storeLocalConf)
+		we("unable configurate store files-system-local client", e)
+	}
+	// handlers incoming request
 	handlersConf, e := aphandv1.ConfigFromEnv(projectName)
 	we("unable read handlers environment", e)
-	handlers := aphandv1.New(handlersConf, db)
-	we("unable configurate handlers client", e)
+	handlers := aphandv1.New(handlersConf, db, token, storeFiles)
+	we("unable configurate handlers", e)
 
 	if len(serverConf.PathFileLogs) > 0 { // logs on file if found path on enviroment
 		gin.DisableConsoleColor()

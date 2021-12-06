@@ -16,7 +16,7 @@ import (
 
 // BookHandler incoming request for books
 type BookHandler struct {
-	*Base
+	*base
 }
 
 // PostCreateBook add a new book
@@ -31,7 +31,7 @@ func (h *BookHandler) PostCreateBook(c *gin.Context) {
 	}
 	item := h.toModelBookFromRequest(&d)
 	// validate category id
-	if _, e := h.DB.Categories().Find(item.CategoryID); e != nil {
+	if _, e := h.db.Categories().Find(item.CategoryID); e != nil {
 		if e == apdbabstract.ErrorNoItems {
 			resp.sendNotFound(aphv1resp.CodeNotFoundCategory, errors.New("category id not found"))
 		} else {
@@ -39,7 +39,7 @@ func (h *BookHandler) PostCreateBook(c *gin.Context) {
 		}
 		return
 	}
-	id, e := h.DB.Books().Add(item)
+	id, e := h.db.Books().Add(item)
 
 	if e != nil {
 		resp.sendInternalError(aphv1resp.CodeInternalError, e)

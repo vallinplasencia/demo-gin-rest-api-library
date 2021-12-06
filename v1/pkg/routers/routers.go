@@ -6,7 +6,7 @@ import (
 	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1"
 )
 
-// InitRouters set endpoints and yours handlers
+// InitRouters set endpoints with yours handlers
 func InitRouters(eng *gin.Engine, h *aphandv1.Handlers) {
 	apiv1 := eng.Group("/api/v1")
 	{

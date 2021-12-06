@@ -14,6 +14,8 @@ type config struct {
 	WriteTimeout int64 `envconfig:"WRITE_TIMEOUT"`
 
 	PathFileLogs string `envconfig:"PATH_FILE_LOGS"`
+
+	StoreUploadedFilesMode StoreFileType `envconfig:"STORE_UPLOADED_FILES_MODE"`
 }
 
 // ConfigFromEnv ...
@@ -27,7 +29,8 @@ func ConfigFromEnv(prefix string) (*config, error) {
 		ReadTimeout:  10,
 		WriteTimeout: 10,
 
-		PathFileLogs: "",
+		PathFileLogs:           "",
+		StoreUploadedFilesMode: StoreFilesSystemLocal,
 	}
 	e := envconfig.Process(prefix, &conf)
 	return &conf, e
