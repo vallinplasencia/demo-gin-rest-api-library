@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
-	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -14,7 +13,6 @@ import (
 	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
 	apstoreabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/abstract"
-	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
@@ -112,24 +110,12 @@ func (b *base) saveUploadFile(directoryIn string, file *multipart.FileHeader) (s
 	return fd.Path, nil
 }
 
-// getLoggedUser obtiene el usuario logueado
-func (b *base) getLoggedUser(c *gin.Context) *apmodels.AuthUser {
+// getUser obtiene el usuario logueado
+func (b *base) getUser(c *gin.Context) *apmodels.AuthUser {
 	return c.MustGet(apmodels.KeyUserContext).(*apmodels.AuthUser)
 }
 
 // authorize returna true si el usuario logueado tiene permiso para acceder al recurso de la peticion
-func (b *base) authorize(c *gin.Context, searchPerm apmodels.PermissionType) bool {
-	resp := response{c: c, env: b.env}
-	u := b.getLoggedUser(c)
-	if u == nil {
-		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
-		c.Abort()
-		return false
-	}
-	if !u.ContainRermission(searchPerm) {
-		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
-		c.Abort()
-		return false
-	}
-	return true
+func (b *base) authorize(u *apmodels.AuthUser, searchPerm apmodels.PermissionType) bool {
+	return u.ContainRermission(apmodels.PermissionAddBook)
 }

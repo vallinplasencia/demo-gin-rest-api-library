@@ -27,11 +27,12 @@ type AccountsHandler struct {
 
 // PostCreateAccount add a new account
 func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
-	if !h.authorize(c, apmodels.PermissionCreateAccount) {
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionAddBook) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
+		c.Abort()
 		return
 	}
-	resp := response{c: c, env: h.env}
-
 	var e error
 	b := aphv1req.CreateAccount{}
 
@@ -97,7 +98,12 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 
 // PostLogin check usernameOrEmail and password
 func (h *AccountsHandler) PostLogin(c *gin.Context) {
-	resp := response{c: c, env: h.env}
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionAddBook) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
+		c.Abort()
+		return
+	}
 	var e error
 	b := aphv1req.Login{}
 
@@ -173,9 +179,9 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 // === conv === //
 
 func (h *AccountsHandler) toModelAccountFromRequest(d *aphv1req.CreateAccount, username, hashPasword, pathInAvatar string) *apv1models.Account {
-	now := time.Now().UTC().Unix()
 	roles := []apmodels.RoleType{apmodels.RoleUser}
-	if d.Email == "vallin.plasencia@gmail.com" { // simular un usuario de admin
+	// simular un usuario de admin
+	if d.Email == "vallin.plasencia@gmail.com" {
 		roles = []apmodels.RoleType{apmodels.RoleUser, apmodels.RoleAdmin}
 	}
 	return &apv1models.Account{
@@ -186,7 +192,7 @@ func (h *AccountsHandler) toModelAccountFromRequest(d *aphv1req.CreateAccount, u
 		Password:  hashPasword,
 		Roles:     roles,
 		Avatar:    pathInAvatar,
-		CreatedAt: now,
+		CreatedAt: time.Now().UTC().Unix(),
 		UpdatedAt: 0,
 	}
 }
