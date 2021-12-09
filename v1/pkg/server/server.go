@@ -81,7 +81,12 @@ func New() *Server {
 	eng.Use(gin.Recovery())
 
 	// ======= init routers with yours handlers ======= //
-	aprouter.InitRouters(eng, handlers)
+	r := aprouter.Router{
+		Token: token,
+		Eng:   eng,
+		H:     handlers,
+	}
+	r.InitRouters()
 
 	return &Server{
 		eng: eng,

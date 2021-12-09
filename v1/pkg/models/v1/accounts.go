@@ -1,5 +1,9 @@
 package v1
 
+import (
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
+)
+
 // Account ...
 type Account struct {
 	ID        string
@@ -7,7 +11,7 @@ type Account struct {
 	Email     string
 	Username  string
 	Password  string
-	Roles     []RoleType
+	Roles     []apmodels.RoleType
 	Avatar    string
 	CreatedAt int64
 	UpdatedAt int64
@@ -30,29 +34,4 @@ type Session struct {
 	// LastAccessTokenGeneratedAt ultimo access token  se genero con este refresh token
 	LastAccessTokenGeneratedAt int64
 	CreatedAt                  int64
-}
-
-type RoleType string
-
-const (
-	RoleIndeterminate RoleType = ""
-	RoleAnonymous     RoleType = "anonymous"
-	RoleUser          RoleType = "user"
-	RoleAdmin         RoleType = "admin"
-)
-
-// ToRolesFromString retorna un tipo de rol segun s.
-//
-func ToRolesFromString(s string) RoleType {
-	values := map[string]RoleType{
-		"":          RoleIndeterminate,
-		"anonymous": RoleAnonymous,
-		"user":      RoleUser,
-		"admin":     RoleAdmin,
-	}
-	r, ok := values[s]
-	if ok {
-		return r
-	}
-	return RoleIndeterminate
 }

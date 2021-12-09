@@ -15,6 +15,7 @@ import (
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
 	aphv1req "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/req"
 	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
 )
@@ -26,7 +27,11 @@ type AccountsHandler struct {
 
 // PostCreateAccount add a new account
 func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
+	if !h.authorize(c, apmodels.PermissionCreateAccount) {
+		return
+	}
 	resp := response{c: c, env: h.env}
+
 	var e error
 	b := aphv1req.CreateAccount{}
 
@@ -122,7 +127,13 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	}
 	deviceID := aputil.RandString() // identifica al dispositvo desde el q se hizo login
 	// generating access-token(jwt) adn refresh-token
-	token, e := h.token.Create(acc)
+	token, e := h.token.Create(&apmodels.AuthUser{
+		UserID:   acc.ID,
+		Fullname: acc.Fullname,
+		Username: acc.Username,
+		Roles:    acc.Roles,
+		Avatar:   acc.Avatar,
+	})
 	if e != nil {
 		resp.sendInternalError(aphv1resp.CodeInternalError, e)
 		return
@@ -163,9 +174,9 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 
 func (h *AccountsHandler) toModelAccountFromRequest(d *aphv1req.CreateAccount, username, hashPasword, pathInAvatar string) *apv1models.Account {
 	now := time.Now().UTC().Unix()
-	roles := []apv1models.RoleType{apv1models.RoleUser}
+	roles := []apmodels.RoleType{apmodels.RoleUser}
 	if d.Email == "vallin.plasencia@gmail.com" { // simular un usuario de admin
-		roles = []apv1models.RoleType{apv1models.RoleUser, apv1models.RoleAdmin}
+		roles = []apmodels.RoleType{apmodels.RoleUser, apmodels.RoleAdmin}
 	}
 	return &apv1models.Account{
 		ID:        "",

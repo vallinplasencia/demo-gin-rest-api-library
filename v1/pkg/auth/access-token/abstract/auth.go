@@ -1,17 +1,26 @@
 package abstract
 
 import (
+	"errors"
+
 	"github.com/dgrijalva/jwt-go"
 
-	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
+)
+
+var (
+	// ErrUnexpectedSigningMethod metodo de firma del token no coincide con el q se usa
+	ErrUnexpectedSigningMethod error = errors.New("Unexpected signing method")
+	// ErrInvalidToken ...
+	ErrInvalidToken error = errors.New("invalid token")
 )
 
 // Token ...
 type Token interface {
 	// Create crea y retorna un token a partir de los datos del usuario
-	Create(u *apv1models.Account) (*TokenDetails, error)
+	Create(u *apmodels.AuthUser) (*TokenDetails, error)
 	// // Decode retorna los datos del usuario a partir de un token
-	// Decode(token string) (*UserClaims, error)
+	Decode(token string) (*UserClaims, error)
 	// // DecodeYetInvalid retorna los datos del usuario a partir de un token aun estando el token invalido.
 	// DecodeYetInvalid(tokenStr string) (*UserClaims, error)
 }

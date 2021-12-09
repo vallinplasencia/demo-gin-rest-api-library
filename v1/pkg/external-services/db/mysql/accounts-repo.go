@@ -8,7 +8,8 @@ import (
 	"database/sql"
 
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
-	apmodelsv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
+	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
 )
 
 // accountsRepo db access
@@ -17,7 +18,7 @@ type accountsRepo struct {
 }
 
 // Add add a new item
-func (r *accountsRepo) Add(d *apmodelsv1.Account) (string, error) {
+func (r *accountsRepo) Add(d *apv1models.Account) (string, error) {
 	roles := make([]string, len(d.Roles))
 	for i, v := range d.Roles {
 		roles[i] = string(v)
@@ -38,11 +39,11 @@ func (r *accountsRepo) Add(d *apmodelsv1.Account) (string, error) {
 }
 
 // Find find a account by id
-func (r *accountsRepo) Find(id string) (*apmodelsv1.Account, error) {
+func (r *accountsRepo) Find(id string) (*apv1models.Account, error) {
 	q := fmt.Sprintf("SELECT id,fullname,email,username,password,roles,avatar,created_at,updated_at FROM %s WHERE id=?", accountsTable)
 	row := r.db.QueryRow(q, id)
 	roles := ""
-	var d apmodelsv1.Account
+	var d apv1models.Account
 	switch e := row.Scan(
 		&d.ID,
 		&d.Fullname,
@@ -64,11 +65,11 @@ func (r *accountsRepo) Find(id string) (*apmodelsv1.Account, error) {
 }
 
 // FindByUsername find a account by username
-func (r *accountsRepo) FindByUsername(username string) (*apmodelsv1.Account, error) {
+func (r *accountsRepo) FindByUsername(username string) (*apv1models.Account, error) {
 	q := fmt.Sprintf("SELECT id,fullname,email,username,password,roles,avatar,created_at,updated_at FROM %s WHERE username=?", accountsTable)
 	row := r.db.QueryRow(q, username)
 	roles := ""
-	var d apmodelsv1.Account
+	var d apv1models.Account
 	switch e := row.Scan(
 		&d.ID,
 		&d.Fullname,
@@ -90,11 +91,11 @@ func (r *accountsRepo) FindByUsername(username string) (*apmodelsv1.Account, err
 }
 
 // FindByEmail find a account by email
-func (r *accountsRepo) FindByEmail(email string) (*apmodelsv1.Account, error) {
+func (r *accountsRepo) FindByEmail(email string) (*apv1models.Account, error) {
 	q := fmt.Sprintf("SELECT id,fullname,email,username,password,roles,avatar,created_at,updated_at FROM %s WHERE email=?", accountsTable)
 	row := r.db.QueryRow(q, email)
 	roles := ""
-	var d apmodelsv1.Account
+	var d apv1models.Account
 	switch e := row.Scan(
 		&d.ID,
 		&d.Fullname,
@@ -115,10 +116,10 @@ func (r *accountsRepo) FindByEmail(email string) (*apmodelsv1.Account, error) {
 	}
 }
 
-func (r *accountsRepo) toRoles(strRoles string) []apmodelsv1.RoleType {
-	roles := []apmodelsv1.RoleType{}
+func (r *accountsRepo) toRoles(strRoles string) []apmodels.RoleType {
+	roles := []apmodels.RoleType{}
 	for _, v := range strings.Split(strRoles, ",") {
-		roles = append(roles, apmodelsv1.ToRolesFromString(v))
+		roles = append(roles, apmodels.ToRoleFromString(v))
 	}
 	return roles
 }

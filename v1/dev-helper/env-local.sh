@@ -26,7 +26,7 @@ export LIBRARY_ACCESS_TOKEN_AUDIENCE="https://*.library.com"
 export LIBRARY_ACCESS_TOKEN_ISSUER="https://www.library.com"
 export LIBRARY_ACCESS_TOKEN_LIVE="420" # 7 minutos. Tiempo antes de expirar el token de acceso
 export LIBRARY_REFRESH_TOKEN_SECRET_KEY="1029azyb8374cwdv"
-export LIBRARY_REFRESH_TOKEN_LIVE="3196800" # 37 dias. Tiempo antes de expirar el token de acceso
+export LIBRARY_REFRESH_TOKEN_LIVE="3196800" # 37 dias. Tiempo antes de expirar el token de refrescar el access token
 
 # store uploaded files=> system-files local
 export LIBRARY_STORE_UPLOADED_FILES_MODE="files-system-local" # values: files-system-local or aws-s3

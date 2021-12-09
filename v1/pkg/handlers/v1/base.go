@@ -4,39 +4,53 @@ import (
 	"errors"
 	"fmt"
 	"mime/multipart"
+	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
 	apstoreabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/abstract"
+	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
 )
 
+// ErrorRespIsEmpty error cuando una repesta de un sevicio externo esta vacia
 var ErrorRespIsEmpty error = errors.New("response is nil")
 
+// ErrorUnauthorized usuario no tiene permiso para acceder a un recurso
+var ErrorUnauthorized error = errors.New("user does not have permission")
+
+// identificadores para concurrencia
 const (
 	concFindAccountByEmail    aputil.ConcName = "find-account-by-email"
 	concFindAccountByUsername aputil.ConcName = "find-account-by-username"
 )
 
+// miscelaneas
 const (
 	// avatarDirectoryIn directorio interno donde se suben los avatars
 	avatarDirectoryIn string = "xxxvvv/media/avatars"
+	// keyAuthUser clave para obtener el usuario logueado en el contexto de Gin
+	keyAuthUser string = "user"
 )
 
 // Base ...
 type base struct {
 	env aputil.EnvType
 
-	// === services  === //
+	// === external services === //
 
 	// db service
 	db apdbabstract.DB
 	// upload service: AWS-S3 or files system
 	storeFiles apstoreabstract.Store
+
 	// access-token(jwt) and refresh-token for auth
 	token apauthtokenabstract.Token
 }
@@ -96,4 +110,26 @@ func (b *base) saveUploadFile(directoryIn string, file *multipart.FileHeader) (s
 		return "", e
 	}
 	return fd.Path, nil
+}
+
+// getLoggedUser obtiene el usuario logueado
+func (b *base) getLoggedUser(c *gin.Context) *apmodels.AuthUser {
+	return c.MustGet(apmodels.KeyUserContext).(*apmodels.AuthUser)
+}
+
+// authorize returna true si el usuario logueado tiene permiso para acceder al recurso de la peticion
+func (b *base) authorize(c *gin.Context, searchPerm apmodels.PermissionType) bool {
+	resp := response{c: c, env: b.env}
+	u := b.getLoggedUser(c)
+	if u == nil {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
+		c.Abort()
+		return false
+	}
+	if !u.ContainRermission(searchPerm) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized)
+		c.Abort()
+		return false
+	}
+	return true
 }

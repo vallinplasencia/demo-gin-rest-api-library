@@ -1,13 +1,12 @@
 package dgjwt
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	apauthabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
-	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -47,29 +46,29 @@ func New(c *config) (apauthabstract.Token, error) {
 }
 
 // Create crea y retorna un token a partir de los datos del usuario
-func (t *token) Create(acc *apv1models.Account) (*apauthabstract.TokenDetails, error) {
+func (t *token) Create(u *apmodels.AuthUser) (*apauthabstract.TokenDetails, error) {
 	now := time.Now().UTC().Unix()
-	roles := make([]string, len(acc.Roles))
-	for i, r := range acc.Roles {
+	roles := make([]string, len(u.Roles))
+	for i, r := range u.Roles {
 		roles[i] = string(r)
 	}
-	u := &apauthabstract.UserClaims{
-		UserID:   acc.ID,
-		Fullname: acc.Fullname,
-		Username: acc.Username,
+	uc := &apauthabstract.UserClaims{
+		UserID:   u.UserID,
+		Fullname: u.Fullname,
+		Username: u.Username,
 		Roles:    roles,
-		Avatar:   t.fullURLMedia(acc.Avatar),
+		Avatar:   t.fullURLMedia(u.Avatar),
 		StandardClaims: &jwt.StandardClaims{
 			Audience:  t.accessTokenAudience,
 			ExpiresAt: now + t.accessTokenLive,
-			Id:        acc.Username,
+			Id:        u.Username,
 			IssuedAt:  now,
 			Issuer:    t.accessTokenIssuer,
 			NotBefore: now,
 			Subject:   "",
 		},
 	}
-	accToken := jwt.NewWithClaims(t.signingMethod, u)
+	accToken := jwt.NewWithClaims(t.signingMethod, uc)
 	accTokenStr, e := accToken.SignedString([]byte(t.accessTokenSecretKey))
 	if e != nil {
 		return nil, e
@@ -87,30 +86,32 @@ func (t *token) Create(acc *apv1models.Account) (*apauthabstract.TokenDetails, e
 	}, e
 }
 
-// Decode retorna los datos del usuario a partir de un token
+// Decode retorna los datos del usuario siempre q el token sea validod
 func (t *token) Decode(tokenStr string) (*apauthabstract.UserClaims, error) {
 	token, e := jwt.ParseWithClaims(tokenStr, &apauthabstract.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			alg := fmt.Sprint(token.Header["alg"])
-			return nil, fmt.Errorf("Metodo de firma del token inesperada(%s)", alg)
+			// alg := fmt.Sprint(token.Header["alg"])
+			return nil, apauthabstract.ErrUnexpectedSigningMethod
 		}
 		return []byte(t.accessTokenSecretKey), nil
 	})
-	if e == nil {
-		if claims, ok := token.Claims.(*apauthabstract.UserClaims); ok && token.Valid {
-			return claims, nil
-		}
-		return nil, errors.New("Invalid token")
+	if e != nil {
+		return nil, e
 	}
-	return nil, e
+	if claims, ok := token.Claims.(*apauthabstract.UserClaims); ok && token.Valid {
+		return claims, nil
+	}
+	return nil, apauthabstract.ErrInvalidToken
 }
 
 // DecodeYetInvalid retorna los datos del usuario a partir de un token aun estando el token invalido.
+//
+//
 func (t *token) DecodeYetInvalid(tokenStr string) (*apauthabstract.UserClaims, error) {
 	token, e := jwt.ParseWithClaims(tokenStr, &apauthabstract.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			alg := fmt.Sprint(token.Header["alg"])
-			return nil, fmt.Errorf("Metodo de firma del token inesperada(%s)", alg)
+			// alg := fmt.Sprint(token.Header["alg"])
+			return nil, apauthabstract.ErrUnexpectedSigningMethod
 		}
 		return []byte(t.accessTokenSecretKey), nil
 	})
@@ -118,15 +119,13 @@ func (t *token) DecodeYetInvalid(tokenStr string) (*apauthabstract.UserClaims, e
 		if claims, ok := token.Claims.(*apauthabstract.UserClaims); ok && token.Valid {
 			return claims, nil
 		}
-		return nil, errors.New("invalid token")
+		return nil, apauthabstract.ErrInvalidToken
 	}
 	if token != nil {
 		if claims, ok := token.Claims.(*apauthabstract.UserClaims); ok {
 			return claims, e
 		}
 	}
-	// a := jwt.New(&jwt.SigningMethodHMAC{})
-	// a.
 	return nil, e
 }
 

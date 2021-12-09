@@ -18,6 +18,8 @@ const (
 	CodeConflictUsername
 	CodeNotFoundUser
 	CodeIncorrectPassword
+	CodeInvalidAuthToken
+	CodeUnauthorized
 )
 
 var msgs = map[CodeType]string{
@@ -30,6 +32,8 @@ var msgs = map[CodeType]string{
 	CodeConflictUsername:  "username exist",
 	CodeNotFoundUser:      "user not found",
 	CodeIncorrectPassword: "password incorrect",
+	CodeInvalidAuthToken:  "invalid token auth",
+	CodeUnauthorized:      "unauthorized",
 }
 
 // GetMsgError retorna el mensaje de error asociado al codigo
