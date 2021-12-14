@@ -18,16 +18,12 @@ type booksRepo struct {
 
 // Add add a new item
 func (r *booksRepo) Add(d *apmodelsv1.Book) (string, error) {
-	// tags := make([]string, len(d.Tags))
-	// for i, v := range d.Tags {
-	// 	tags[i] = fmt.Sprintf("\"%s\"", v)
-	// }
-	// strTags := fmt.Sprintf("[%s]", strings.Join(tags, ","))
 	jsonTags, e := json.Marshal(d.Tags)
 	if e != nil {
 		return "", e
 	}
-	result, e := r.db.Exec("INSERT INTO books (title,original,tags,published_at,created_at,updated_at,category_id,user_id) VALUES (?,?,?,?,?,?,?,?)", d.Title, d.Original, jsonTags, d.PublishedAt, d.CreatedAt, d.UpdatedAt, d.CategoryID, d.UserID)
+	q := fmt.Sprintf("INSERT INTO %s (title,original,tags,published_at,created_at,updated_at,category_id,user_id) VALUES (?,?,?,?,?,?,?,?)", booksTable)
+	result, e := r.db.Exec(q, d.Title, d.Original, jsonTags, d.PublishedAt, d.CreatedAt, d.UpdatedAt, d.CategoryID, d.UserID)
 	if e != nil {
 		return "", e
 	}
@@ -36,6 +32,62 @@ func (r *booksRepo) Add(d *apmodelsv1.Book) (string, error) {
 		return "", e
 	}
 	return strconv.FormatInt(id, 10), nil
+}
+
+// Edit update a item
+func (r *booksRepo) Edit(d *apmodelsv1.Book) error {
+	jsonTags, e := json.Marshal(d.Tags)
+	if e != nil {
+		return e
+	}
+	q := fmt.Sprintf("UPDATE %s SET title=?,original=?,tags=?,published_at=?,category_id=? WHERE id=?", booksTable)
+	_, e = r.db.Exec(q, d.Title, d.Original, jsonTags, d.PublishedAt, d.CategoryID, d.ID)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+// FindBook find a book by id
+func (r *booksRepo) FindBook(id string) (*apmodelsv1.Book, error) {
+	q := fmt.Sprintf(`SELECT 
+	id,title,original,tags,published_at,created_at,updated_at,category_id,user_id 
+	FROM %s WHERE id=?`, booksTable)
+	row := r.db.QueryRow(q, id)
+
+	item := apmodelsv1.Book{
+		ID:          id,
+		Title:       "",
+		Original:    false,
+		Tags:        []string{},
+		PublishedAt: 0,
+		CreatedAt:   0,
+		UpdatedAt:   0,
+		UserID:      "",
+		CategoryID:  "",
+	}
+
+	bitOriginal := []byte{0}
+	jsonTags := ""
+	switch e := row.Scan(
+		&item.ID,
+		&item.Title,
+		&bitOriginal,
+		&jsonTags,
+		&item.PublishedAt,
+		&item.CreatedAt,
+		&item.UpdatedAt,
+		&item.CategoryID,
+		&item.UserID); e {
+	case nil:
+		item.Original = len(bitOriginal) > 0 && bitOriginal[0] == 1
+		json.Unmarshal([]byte(jsonTags), &item.Tags)
+		return &item, nil
+	case sql.ErrNoRows:
+		return nil, apdbabstract.ErrorNoItems
+	default:
+		return nil, e
+	}
 }
 
 // FindBookSimple find a book by id con su categoria
@@ -54,7 +106,7 @@ func (r *booksRepo) FindBookSimple(id string) (*apmodelsv1.BookSimple, error) {
 		PublishedAt: 0,
 		CreatedAt:   0,
 		UpdatedAt:   0,
-		UserID:      id,
+		UserID:      "",
 		Category:    &apmodelsv1.Category{},
 	}
 

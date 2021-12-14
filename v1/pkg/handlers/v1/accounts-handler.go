@@ -166,6 +166,7 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 		return
 	}
 	resp.sendOK(&aphv1resp.Login{
+		ID:            acc.ID,
 		AuthTwoFactor: false,
 		Token:         &aphv1resp.Token{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken},
 		Fullname:      acc.Fullname,

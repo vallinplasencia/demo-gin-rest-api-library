@@ -19,7 +19,11 @@ type response struct {
 // send ...
 func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{}, abort bool) {
 	if httpCode < 400 {
-		r.c.JSON(httpCode, data)
+		if data != nil {
+			r.c.JSON(httpCode, data)
+		} else {
+			r.c.JSON(httpCode, nil)
+		}
 	} else {
 		msg := aphv1resp.GetMsgError(code) // mensaje por defecto
 		// solo si esta en modo desarrollo se envia el error con todos sus detalles
@@ -30,7 +34,9 @@ func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{},
 			case error:
 				msg = fmt.Sprintf("%s --- %s", msg, t.Error())
 			default:
-				msg = fmt.Sprintf("%s --- %+v", msg, data)
+				if data != nil {
+					msg = fmt.Sprintf("%s --- %+v", msg, data)
+				}
 			}
 		}
 		r.c.JSON(httpCode, &aphv1resp.Error{
@@ -50,15 +56,15 @@ func (r *response) sendOK(data interface{}, abort bool) {
 
 // sendBadRequest ...
 func (r *response) sendBadRequest(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusBadRequest, code, e.Error(), abort)
+	r.send(http.StatusBadRequest, code, e, abort)
 }
 
 // sendNotFound ...
 func (r *response) sendNotFound(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusNotFound, code, e.Error(), abort)
+	r.send(http.StatusNotFound, code, e, abort)
 }
 
 // sendInternalError ...
 func (r *response) sendInternalError(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusInternalServerError, code, e.Error(), abort)
+	r.send(http.StatusInternalServerError, code, e, abort)
 }

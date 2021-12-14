@@ -2,6 +2,7 @@ package resp
 
 // Login ...
 type Login struct {
+	ID            string `json:"id"`
 	AuthTwoFactor bool   `json:"auth_two_factor"`
 	Token         *Token `json:"token,omitempty"`
 	Fullname      string `json:"fullname,omitempty"`

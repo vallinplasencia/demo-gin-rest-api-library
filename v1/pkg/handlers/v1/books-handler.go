@@ -39,9 +39,9 @@ func (h *BookHandler) PostAddBook(c *gin.Context) {
 	if _, e := h.db.Categories().Find(item.CategoryID); e != nil {
 		if e == apdbabstract.ErrorNoItems {
 			resp.sendNotFound(aphv1resp.CodeNotFoundCategory, errors.New("category id not found"), true)
-		} else {
-			resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+			return
 		}
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
 		return
 	}
 	id, e := h.db.Books().Add(item)
@@ -51,6 +51,54 @@ func (h *BookHandler) PostAddBook(c *gin.Context) {
 		return
 	}
 	resp.sendOK(&aphv1resp.ResponseID{ID: id}, false)
+}
+
+// PutEditBook update book
+func (h *BookHandler) PutEditBook(c *gin.Context) {
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionEditBook) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized, true)
+		return
+	}
+	var e error
+	d := aphv1req.EditBook{}
+
+	if e = c.ShouldBindWith(&d, binding.JSON); e != nil {
+		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, true)
+		return
+	}
+	item, e := h.db.Books().FindBook(c.Param("id"))
+	if e != nil {
+		if e == apdbabstract.ErrorNoItems {
+			resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, true)
+			return
+		}
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		return
+	}
+	if item.CategoryID != d.CategoryID {
+		// validando el id de la categorya solo si es diferente a la q ya tenia el libro
+		if _, e := h.db.Categories().Find(item.CategoryID); e != nil {
+			if e == apdbabstract.ErrorNoItems {
+				resp.sendNotFound(aphv1resp.CodeNotFoundCategory, e, true)
+				return
+			}
+			resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+			return
+		}
+	}
+	// solo el usuario q agrego el libro puede editarlo
+	if item.UserID != u.UserID {
+		// se envia un NOTFOUND pq esta tratando de aceder un usuario q no es el propietario del libro
+		resp.sendNotFound(aphv1resp.CodeNotFoundBook, nil, true)
+		return
+	}
+	e = h.db.Books().Edit(item)
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		return
+	}
+	resp.sendOK(struct{}{}, false)
 }
 
 // GetRetrieveBook get book
@@ -67,6 +115,37 @@ func (h *BookHandler) GetRetrieveBook(c *gin.Context) {
 			return
 		}
 		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		return
+	}
+	// solo el usuario q agrego el libro puede obtener sus datos
+	if item.UserID != u.UserID {
+		// se envia un NOTFOUND pq esta tratando de aceder un usuario q no es el proietario del libro
+		resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, true)
+		return
+	}
+	resp.sendOK(h.toRespBookFromDB(item), false)
+}
+
+// GetListBooks list books
+func (h *BookHandler) GetListBooks(c *gin.Context) {
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionRetrieveBook) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized, true)
+		return
+	}
+	item, e := h.db.Books().FindBookSimple(c.Param("id"))
+	if e != nil {
+		if e == apdbabstract.ErrorNoItems {
+			resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, true)
+			return
+		}
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		return
+	}
+	// solo el usuario q agrego el libro puede obtener sus datos
+	if item.UserID != u.UserID {
+		// se envia un NOTFOUND pq esta tratando de aceder un usuario q no es el proietario del libro
+		resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, true)
 		return
 	}
 	resp.sendOK(h.toRespBookFromDB(item), false)
