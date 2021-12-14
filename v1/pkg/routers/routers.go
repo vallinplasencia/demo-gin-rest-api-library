@@ -27,8 +27,10 @@ func (r *Router) initV1Routers() {
 	// middlewares
 	apiv1.Use(apmiddlewares.AuthJwt(r.Token))
 	{
-		apiv1.POST("/books", r.H.Books.PostAddBook)
 		apiv1.POST("/accounts", r.H.Accounts.PostCreateAccount)
 		apiv1.POST("/login", r.H.Accounts.PostLogin)
+
+		apiv1.POST("/books", r.H.Books.PostAddBook)
+		apiv1.GET("/books/:id", r.H.Books.GetRetrieveBook)
 	}
 }

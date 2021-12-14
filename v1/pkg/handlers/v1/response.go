@@ -17,7 +17,7 @@ type response struct {
 }
 
 // send ...
-func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{}) {
+func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{}, abort bool) {
 	if httpCode < 400 {
 		r.c.JSON(httpCode, data)
 	} else {
@@ -38,24 +38,27 @@ func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{})
 			Msg:  msg,
 		})
 	}
+	if abort {
+		r.c.Abort()
+	}
 }
 
 // sendOK ...
-func (r *response) sendOK(data interface{}) {
-	r.send(http.StatusOK, aphv1resp.CodeOK, data)
+func (r *response) sendOK(data interface{}, abort bool) {
+	r.send(http.StatusOK, aphv1resp.CodeOK, data, abort)
 }
 
 // sendBadRequest ...
-func (r *response) sendBadRequest(code aphv1resp.CodeType, e error) {
-	r.send(http.StatusBadRequest, code, e.Error())
+func (r *response) sendBadRequest(code aphv1resp.CodeType, e error, abort bool) {
+	r.send(http.StatusBadRequest, code, e.Error(), abort)
 }
 
 // sendNotFound ...
-func (r *response) sendNotFound(code aphv1resp.CodeType, e error) {
-	r.send(http.StatusNotFound, code, e.Error())
+func (r *response) sendNotFound(code aphv1resp.CodeType, e error, abort bool) {
+	r.send(http.StatusNotFound, code, e.Error(), abort)
 }
 
 // sendInternalError ...
-func (r *response) sendInternalError(code aphv1resp.CodeType, e error) {
-	r.send(http.StatusInternalServerError, code, e.Error())
+func (r *response) sendInternalError(code aphv1resp.CodeType, e error, abort bool) {
+	r.send(http.StatusInternalServerError, code, e.Error(), abort)
 }

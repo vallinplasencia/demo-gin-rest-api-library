@@ -52,6 +52,7 @@ const (
 
 	// === books === //
 	PermissionAddBook
+	PermissionRetrieveBook
 )
 
 // ToRoleFromString retorna un tipo de rol segun s.

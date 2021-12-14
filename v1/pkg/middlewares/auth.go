@@ -109,7 +109,7 @@ func init() {
 		apmodels.PermissionCreateAccount, apmodels.PermissionLogin,
 	}
 	users := []apmodels.PermissionType{
-		apmodels.PermissionAddBook,
+		apmodels.PermissionAddBook, apmodels.PermissionRetrieveBook,
 	}
 	admin := []apmodels.PermissionType{}
 	permissions = map[apmodels.RoleType][]apmodels.PermissionType{

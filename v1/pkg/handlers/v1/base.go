@@ -56,7 +56,7 @@ type base struct {
 // === funciones comunes q pueden ser usadas en cualesquiera de los handlers === //
 
 // findAccountByEmail recupera una cuenta por su email
-func (b *base) findAccountByEmail(email string, ch chan *aputil.ConcurrencyData, out *apv1models.Account) {
+func (b *base) findAccountByEmail(email string, ch chan<- *aputil.ConcurrencyData, out *apv1models.Account) {
 	d, e := b.db.Accounts().FindByEmail(email)
 	cd := &aputil.ConcurrencyData{
 		Err:  nil,
@@ -74,7 +74,7 @@ func (b *base) findAccountByEmail(email string, ch chan *aputil.ConcurrencyData,
 }
 
 // findAccountByUsername recupera una cuenta por su username
-func (b *base) findAccountByUsername(username string, ch chan *aputil.ConcurrencyData, out *apv1models.Account) {
+func (b *base) findAccountByUsername(username string, ch chan<- *aputil.ConcurrencyData, out *apv1models.Account) {
 	d, e := b.db.Accounts().FindByUsername(username)
 	cd := &aputil.ConcurrencyData{
 		Err:  nil,
@@ -117,5 +117,5 @@ func (b *base) getUser(c *gin.Context) *apmodels.AuthUser {
 
 // authorize returna true si el usuario logueado tiene permiso para acceder al recurso de la peticion
 func (b *base) authorize(u *apmodels.AuthUser, searchPerm apmodels.PermissionType) bool {
-	return u.ContainRermission(apmodels.PermissionAddBook)
+	return u.ContainRermission(searchPerm)
 }

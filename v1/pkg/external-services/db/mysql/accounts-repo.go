@@ -24,8 +24,7 @@ func (r *accountsRepo) Add(d *apv1models.Account) (string, error) {
 		roles[i] = string(v)
 	}
 	strRoles := fmt.Sprintf("%s", strings.Join(roles, ","))
-	// strRoles = "user"
-	fmt.Println("AAAAA: ", strRoles)
+
 	q := fmt.Sprintf("INSERT INTO %s (fullname,email,username,password,roles,avatar,created_at,updated_at) VALUES (?,?,?,?,?,?,?,?)", accountsTable)
 	result, e := r.db.Exec(q, d.Fullname, d.Email, d.Username, d.Password, strRoles, d.Avatar, d.CreatedAt, d.UpdatedAt)
 	if e != nil {

@@ -1,3 +1,3 @@
 go mod vendor
-docker build --tag vallinplasencia/demo-books:dev-xxx -f dockerfile.local ../.
+docker build --tag vallinplasencia/demo-gin-rest-api-library:dev-xxx -f dockerfile.local ../.
 rm -r ../vendor

@@ -24,7 +24,7 @@ export LIBRARY_DB_MYSQL_DBNAME="library"
 export LIBRARY_ACCESS_TOKEN_SECRET_KEY="1029azyb8374cwdv"
 export LIBRARY_ACCESS_TOKEN_AUDIENCE="https://*.library.com"
 export LIBRARY_ACCESS_TOKEN_ISSUER="https://www.library.com"
-export LIBRARY_ACCESS_TOKEN_LIVE="420" # 7 minutos. Tiempo antes de expirar el token de acceso
+export LIBRARY_ACCESS_TOKEN_LIVE="1420" # 7 minutos. Tiempo antes de expirar el token de acceso
 export LIBRARY_REFRESH_TOKEN_SECRET_KEY="1029azyb8374cwdv"
 export LIBRARY_REFRESH_TOKEN_LIVE="3196800" # 37 dias. Tiempo antes de expirar el token de refrescar el access token
 
