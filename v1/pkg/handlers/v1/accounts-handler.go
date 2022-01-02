@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -29,14 +28,14 @@ type AccountsHandler struct {
 func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 	resp, u := response{c: c, env: h.env}, h.getUser(c)
 	if !h.authorize(u, apmodels.PermissionAddBook) {
-		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized, true)
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, errorUnauthorized, nil, true)
 		return
 	}
 	var e error
 	b := aphv1req.CreateAccount{}
 
 	if e = c.ShouldBindWith(&b, binding.FormMultipart); e != nil {
-		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, true)
+		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, nil, true)
 		return
 	}
 	// SOLO simula la generacion del username. NO usar en production
@@ -59,29 +58,29 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 			// check error email y/o username available
 			if e := cData.Err; e != apdbabstract.ErrorNoItems {
 				log.Printf("ms id throws error: %s", cData.Name)
-				resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+				resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 				return
 			}
 		}
 	}
 	if len(outAccountByEmail.Email) != 0 {
-		resp.send(http.StatusConflict, aphv1resp.CodeConflictEmail, errors.New("email exist"), true)
+		resp.send(http.StatusConflict, aphv1resp.CodeConflictEmail, nil, nil, true)
 		return
 	}
 	if len(outAccountByUsername.Username) != 0 {
-		resp.send(http.StatusConflict, aphv1resp.CodeConflictUsername, errors.New("username exist"), true)
+		resp.send(http.StatusConflict, aphv1resp.CodeConflictUsername, nil, nil, true)
 		return
 	}
 	// save avatar
 	pathInAvatar, e := h.saveUploadFile(avatarDirectoryIn, b.Avatar)
 	if e != nil {
-		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 		return
 	}
 	// generate password
 	hashPass, e := apauth.GeneratePassword([]byte(b.Password))
 	if e != nil {
-		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 		return
 	}
 	item := h.toModelAccountFromRequest(&b, username, hashPass, pathInAvatar)
@@ -89,24 +88,24 @@ func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 	id, e := h.db.Accounts().Add(item)
 
 	if e != nil {
-		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 		return
 	}
-	resp.sendOK(&aphv1resp.ResponseID{ID: id}, false)
+	resp.sendOK(&aphv1resp.ResponseID{ID: id}, nil, false)
 }
 
 // PostLogin check usernameOrEmail and password
 func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	resp, u := response{c: c, env: h.env}, h.getUser(c)
 	if !h.authorize(u, apmodels.PermissionLogin) {
-		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, ErrorUnauthorized, true)
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, errorUnauthorized, nil, true)
 		return
 	}
 	var e error
 	b := aphv1req.Login{}
 
 	if e = c.ShouldBindWith(&b, binding.JSON); e != nil {
-		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, true)
+		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, nil, true)
 		return
 	}
 	usernameOrEmail := b.UsernameOrEmail
@@ -118,15 +117,15 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	}
 	if e != nil {
 		if e == apdbabstract.ErrorNoItems { // not found username or email
-			resp.sendNotFound(aphv1resp.CodeNotFoundUser, e, true)
+			resp.sendNotFound(aphv1resp.CodeNotFoundUser, e, nil, true)
 			return
 		} else {
-			resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+			resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 			return
 		}
 	}
 	if e = apauth.ComparePasswords(acc.Password, []byte(b.Password)); e != nil {
-		resp.send(http.StatusForbidden, aphv1resp.CodeIncorrectPassword, e, true)
+		resp.send(http.StatusForbidden, aphv1resp.CodeIncorrectPassword, e, nil, true)
 		return
 	}
 	deviceID := aputil.RandString() // identifica al dispositvo desde el q se hizo login
@@ -139,7 +138,7 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 		Avatar:   acc.Avatar,
 	})
 	if e != nil {
-		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 		return
 	}
 	ua := parseUserAgent(c.Request.UserAgent())
@@ -162,7 +161,7 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 	}
 	_, e = h.db.Sessions().Add(&sess)
 	if e != nil {
-		resp.sendInternalError(aphv1resp.CodeInternalError, e, true)
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
 		return
 	}
 	resp.sendOK(&aphv1resp.Login{
@@ -172,7 +171,7 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 		Fullname:      acc.Fullname,
 		Avatar:        acc.Avatar,
 		DeviceID:      deviceID,
-	}, false)
+	}, nil, false)
 }
 
 // === conv form request === //

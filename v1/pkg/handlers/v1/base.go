@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"os"
@@ -16,26 +15,6 @@ import (
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
-)
-
-// ErrorRespIsEmpty error cuando una repesta de un sevicio externo esta vacia
-var ErrorRespIsEmpty error = errors.New("response is nil")
-
-// ErrorUnauthorized usuario no tiene permiso para acceder a un recurso
-var ErrorUnauthorized error = errors.New("user does not have permission")
-
-// identificadores para concurrencia
-const (
-	concFindAccountByEmail    aputil.ConcName = "find-account-by-email"
-	concFindAccountByUsername aputil.ConcName = "find-account-by-username"
-)
-
-// miscelaneas
-const (
-	// avatarDirectoryIn directorio interno donde se suben los avatars
-	avatarDirectoryIn string = "xxxvvv/media/avatars"
-	// keyAuthUser clave para obtener el usuario logueado en el contexto de Gin
-	keyAuthUser string = "user"
 )
 
 // Base ...
@@ -66,7 +45,7 @@ func (b *base) findAccountByEmail(email string, ch chan<- *aputil.ConcurrencyDat
 	case e != nil:
 		cd.Err = e
 	case d == nil:
-		cd.Err = ErrorRespIsEmpty
+		cd.Err = errorRespIsEmpty
 	default:
 		*out = *d
 	}
@@ -84,7 +63,7 @@ func (b *base) findAccountByUsername(username string, ch chan<- *aputil.Concurre
 	case e != nil:
 		cd.Err = e
 	case d == nil:
-		cd.Err = ErrorRespIsEmpty
+		cd.Err = errorRespIsEmpty
 	default:
 		*out = *d
 	}

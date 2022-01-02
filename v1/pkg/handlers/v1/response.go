@@ -17,7 +17,10 @@ type response struct {
 }
 
 // send ...
-func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{}, abort bool) {
+func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{}, headers map[string]string, abort bool) {
+	for k, v := range headers {
+		r.c.Header(k, v)
+	}
 	if httpCode < 400 {
 		if data != nil {
 			r.c.JSON(httpCode, data)
@@ -50,21 +53,21 @@ func (r *response) send(httpCode int, code aphv1resp.CodeType, data interface{},
 }
 
 // sendOK ...
-func (r *response) sendOK(data interface{}, abort bool) {
-	r.send(http.StatusOK, aphv1resp.CodeOK, data, abort)
+func (r *response) sendOK(data interface{}, headers map[string]string, abort bool) {
+	r.send(http.StatusOK, aphv1resp.CodeOK, data, headers, abort)
 }
 
 // sendBadRequest ...
-func (r *response) sendBadRequest(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusBadRequest, code, e, abort)
+func (r *response) sendBadRequest(code aphv1resp.CodeType, e error, headers map[string]string, abort bool) {
+	r.send(http.StatusBadRequest, code, e, headers, abort)
 }
 
 // sendNotFound ...
-func (r *response) sendNotFound(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusNotFound, code, e, abort)
+func (r *response) sendNotFound(code aphv1resp.CodeType, e error, headers map[string]string, abort bool) {
+	r.send(http.StatusNotFound, code, e, headers, abort)
 }
 
 // sendInternalError ...
-func (r *response) sendInternalError(code aphv1resp.CodeType, e error, abort bool) {
-	r.send(http.StatusInternalServerError, code, e, abort)
+func (r *response) sendInternalError(code aphv1resp.CodeType, e error, headers map[string]string, abort bool) {
+	r.send(http.StatusInternalServerError, code, e, headers, abort)
 }

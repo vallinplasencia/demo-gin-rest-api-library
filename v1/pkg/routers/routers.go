@@ -31,6 +31,7 @@ func (r *Router) initV1Routers() {
 		apiv1.POST("/login", r.H.Accounts.PostLogin)
 
 		apiv1.POST("/books", r.H.Books.PostAddBook)
+		apiv1.GET("/books", r.H.Books.GetListBooks)
 		apiv1.GET("/books/:id", r.H.Books.GetRetrieveBook)
 		apiv1.PUT("/books/:id", r.H.Books.PutEditBook)
 	}

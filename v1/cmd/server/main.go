@@ -14,7 +14,7 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-	// heart app
+	// server up
 	s := apserver.New()
 	s.Run()
 
