@@ -35,7 +35,7 @@ var msgs = map[CodeType]string{
 	CodeIncorrectPassword: "password incorrect",
 	CodeInvalidAuthToken:  "invalid token auth",
 	CodeUnauthorized:      "unauthorized",
-	CodeNotFoundBook:      "book  not found",
+	CodeNotFoundBook:      "book not found",
 }
 
 // GetMsgError retorna el mensaje de error asociado al codigo

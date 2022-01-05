@@ -23,6 +23,8 @@ func (r *Router) InitRouters() {
 
 // initV1Routers set endpoints with yours handlers
 func (r *Router) initV1Routers() {
+	r.Eng.Use(apmiddlewares.Cors())
+
 	apiv1 := r.Eng.Group("/api/v1")
 	// middlewares
 	apiv1.Use(apmiddlewares.AuthJwt(r.Token))

@@ -1,0 +1,331 @@
+{
+	"info": {
+		"_postman_id": "e854ea28-f300-4705-b5cf-59fa24f4ffc9",
+		"name": "gin-library-demo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Accounts",
+			"item": [
+				{
+					"name": "Anonymous",
+					"item": [
+						{
+							"name": "Login",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "User-Agent",
+										"value": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"username_or_email\":\"vallin.plasencia@gmail.com\",\n    \"password\":\"Asd*123.\"\n}"
+								},
+								"url": {
+									"raw": "{{Url}}/login",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "CreateAccount",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"fullname\":\"Vallin Plasencia Valdes\",\n    \"email\":\"vallin.plasencia@gmail.com\",\n    \"username\":\"vallinplasencia\",\n    \"password\":\"Asd*123.\",\n    \"gender\":\"male\",\n    \"avatar\":\"/aaa/a.jpg\"\n}"
+								},
+								"url": {
+									"raw": "{{Url}}/accounts",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"accounts"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "noauth"
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Books",
+			"item": [
+				{
+					"name": "Logged",
+					"item": [
+						{
+							"name": "CreateBook",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"Libro 1\",\n    \"tags\":[\"uno\",\"dos\"],\n    \"published_at\": 123,\n    \"original\": false,\n    \"category_id\": \"1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}/books",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"books"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "EditBook",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"Libro 11\",\n    \"tags\":[\"uno1\",\"dos1\"],\n    \"published_at\": 1231,\n    \"original\": true,\n    \"category_id\": \"13\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}/books/16",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"books",
+										"16"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "RetrieveBook",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"Libro 1\",\n    \"tags\":[\"uno\",\"dos\"],\n    \"published_at\": 123,\n    \"original\": true,\n    \"category_id\": \"1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}/books/17",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"books",
+										"17"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "ListBooks",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"title\":\"Libro 1\",\n    \"tags\":[\"uno\",\"dos\"],\n    \"published_at\": 123,\n    \"original\": true,\n    \"category_id\": \"1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{Url}}/books?_page=1&_limit=5&_sort=category-name&title[ctn]=Libro 1&tag[ctn]=uno&original=true",
+									"host": [
+										"{{Url}}"
+									],
+									"path": [
+										"books"
+									],
+									"query": [
+										{
+											"key": "_page",
+											"value": "1"
+										},
+										{
+											"key": "_limit",
+											"value": "5"
+										},
+										{
+											"key": "_sort",
+											"value": "category-name"
+										},
+										{
+											"key": "title[ctn]",
+											"value": "Libro 1"
+										},
+										{
+											"key": "tag[ctn]",
+											"value": "uno"
+										},
+										{
+											"key": "original",
+											"value": "true"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "{{AuthToken}}",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				}
+			]
+		}
+	]
+}

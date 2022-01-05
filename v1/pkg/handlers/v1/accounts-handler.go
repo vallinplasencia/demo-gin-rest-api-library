@@ -27,7 +27,7 @@ type AccountsHandler struct {
 // PostCreateAccount add a new account
 func (h *AccountsHandler) PostCreateAccount(c *gin.Context) {
 	resp, u := response{c: c, env: h.env}, h.getUser(c)
-	if !h.authorize(u, apmodels.PermissionAddBook) {
+	if !h.authorize(u, apmodels.PermissionCreateAccount) {
 		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, errorUnauthorized, nil, true)
 		return
 	}

@@ -1,0 +1,536 @@
+openapi: 3.0.0
+info:
+  title: Library demo
+  description: Library demo with golang, gin, mysql, aws-s3, ...
+  version: 1.0.0
+  termsOfService: http://library-demo.local/terms/
+  contact:
+    name: Vallin Plasencia Valdes
+    url: https://github.com/vallinplasencia
+    email: vallin.plasencia@gmail.com
+  license:
+    name: Vallin
+    url: http://library-demo.local/license.html
+servers:
+  - url: http://gin-library-demo.local:8080/api/v1
+    description: Local server.
+  - url: http://library-demo.local/api/v1
+    description: Production server.
+  - url: http://dev.library-demo.local/api/v1
+    description: Developemnt server.
+# tags:
+#   - account
+#   - books
+paths:
+  /accounts:
+    post:
+      summary: Create a account.
+      security: []
+      tags:
+        - accounts
+      requestBody:
+        description: Data for create account .
+        required: true
+        content:
+         multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullname:
+                  type: string
+                  maxLength: 150
+                  description: Fullname of user.
+                email:
+                  type: string
+                  format: email
+                  maxLength: 240
+                  description: Email of user.
+                password:
+                  type: string
+                  format: password
+                  description: Password of user.
+                gender:
+                  type: string
+                  enum: [male,female,other]
+                  description: Gender of user.
+                avatar:
+                  type: string
+                  format: binary
+                  description: Image for avatar user.
+              required:
+                - fullname
+                - email
+                - password
+                - gender
+                - avatar
+      responses:
+        '200':
+          description: Data new account.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Id of new account.
+                example:
+                  id: 123
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+  /login:
+    post:
+      summary: Login on app.
+      security: []
+      tags:
+        - accounts
+      requestBody:
+        description: Data for login.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username_or_email:
+                  type: string
+                  description: Username or email.
+                  maxLength: 150
+                password:
+                  type: string
+                  description: Password.
+                  maxLength: 2000
+              example:
+                username_or_email: useremail@gmail.com
+                password: my-secret-paswword
+              required:
+                - username_or_email
+                - password
+      responses:
+        '200':
+          description: Data access to the app.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access-token:
+                    type: string
+                    description: Access token with format jwt.
+                  refresh-token:
+                    type: string
+                    description: Refresh token para generar un nuevo access token.
+                example:
+                  access-token: jwt
+                  refresh-token: token
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+  /refesh-token:
+    post:
+      summary: Generate a new access-token.
+      tags:
+        - accounts
+      requestBody:
+        description: Data for generate a new access-token.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh-token:
+                  type: string
+                  description: Refresh token para generar un nuevo access token.
+                  maxLength: 500
+              example:
+                refresh-token: token
+              required:
+                - refresh-token
+      responses:
+        '200':
+          description: Data for mantain login.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access-token:
+                    type: string
+                    description: New access token.
+                example:
+                  access-token: jwt
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+  /books:
+    post:
+      summary: Create a book.
+      tags:
+        - books
+      requestBody:
+        description: Data for create a book.
+        required: true
+        content:
+         application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 150
+                  description: Title of book.
+                original:
+                  type: boolean
+                  description: A book is original from user.
+                tags:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: string
+                    maxLength: 60
+                  description: Tags of book.
+                published_at:
+                  type: integer
+                  description: Date on format unix published book.
+                category_id:
+                  type: string
+                  description: Category of book.
+              required:
+                - title
+                - original
+                - tags
+                - published_at
+                - category_id
+              example:
+                title: A beautiful book
+                original: true
+                tags: [tag1,tag2]
+                published_at: 123456789
+                category_id: 12
+      responses:
+        '200':
+          description: Data new book.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Book id.
+                example:
+                  id: 123
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+    get:
+      summary: List books.
+      tags:
+        - books
+      parameters:
+        - $ref: '#/components/parameters/LimitParamQuery'
+        - $ref: '#/components/parameters/PageParamQuery'
+      responses:
+        '200':
+          description: List books.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BookSimple'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+  /books/{id}:
+    get:
+      summary: Get a book.
+      tags:
+        - books
+      parameters:
+        - $ref: '#/components/parameters/IdParamPath'
+      responses:
+        '200':
+          description: Data new book.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookSimple'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+    put:
+      summary: Update a book.
+      tags:
+        - books
+      parameters:
+        - $ref: '#/components/parameters/IdParamPath'
+      requestBody:
+        description: Data for update book.
+        required: true
+        content:
+         application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  maxLength: 150
+                  description: Title of book.
+                original:
+                  type: boolean
+                  description: A book is original from user.
+                tags:
+                  type: array
+                  minItems: 1
+                  maxItems: 10
+                  items:
+                    type: string
+                    maxLength: 60
+                  description: Tags of book.
+                published_at:
+                  type: integer
+                  description: Date on format unix published book.
+                category_id:
+                  type: string
+                  description: Category of book.
+              required:
+                - title
+                - original
+                - tags
+                - published_at
+                - category_id
+              example:
+                title: A beautiful book
+                original: true
+                tags: [tag1,tag2]
+                published_at: 123456789
+                category_id: 12
+      responses:
+        '200':
+          description: Updated a book.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+    delete:
+      summary: Delete a book.
+      tags:
+        - books
+      parameters:
+        - $ref: '#/components/parameters/IdParamPath'
+      responses:
+        '200':
+          description: Deleted a book.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/GenericError'
+        '5XX':
+          $ref: '#/components/responses/GenericError'
+  
+  /users:
+    get:
+      summary: Returns a list of users.
+      description: Optional extended description in CommonMark or HTML.
+      responses:
+        '200':    # status code
+          description: A JSON array of user names
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: 
+                  type: string
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: number
+          description: Codigo de error de la app.
+        msg:
+          type: string
+          description: Mensaje descriptivo sobre el error. En desarrollo es un mensaje mas explicito que cuando la app esta en produccion.
+      example:
+        code: 1002
+        msg: description error ocurred
+    BookSimple:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Id of new book.
+        title:
+          type: string
+          maxLength: 150
+          description: Title of book.
+        original:
+          type: boolean
+          description: A book is original from user.
+        tags:
+          type: array
+          minItems: 1
+          maxItems: 10
+          description: Tags of book.
+          items:
+            type: string
+            maxLength: 60
+        published_at:
+          type: integer
+          description: Date on format unix published book.
+        created_at:
+          type: integer
+          description: Date on format unix created book on db.
+        updated_at:
+          type: integer
+          description: Date on format unix updated book on db.
+        category:
+          type: object
+          description: Category of book.
+          properties:
+            id:
+              type: string
+              description: Category id.
+      example:
+        id: 123
+        title: A beautiful book
+        original: true
+        tags: [tag1,tag2]
+        published_at: 123456789
+        created_at: 123456789
+        updated_at: 123456789
+        category:
+          id: 123
+          name: fiction
+          description: Fiction category
+  responses:
+    BadRequest:
+      description: Error de validacion.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 1003
+            msg: invalid argument
+    Unauthorized:
+      description: No tiene accesso.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 1010
+            msg: unauthorized
+    NotFound:
+      description: No encuentra un recurso.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 1011
+            msg: not found
+    GenericError:
+      description: Ocurred error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  parameters:
+    LimitParamQuery:
+      in: query
+      name: _limit
+      required: false
+      description: Total items to return on paginatin.
+      schema:
+        type: integer
+        format: uint64
+        minimum: 1
+        maximum: 100
+        default: 20
+        example: 50
+    PageParamQuery:
+      in: query
+      name: _page
+      required: false
+      description: Page for pagination.
+      schema:
+        type: integer
+        format: uint64
+        minimum: 1
+        default: 1
+        example: 1
+    IdParamPath:
+      in: path
+      name: id
+      required: true
+      description: Id del item.
+      schema:
+        type: string
+      example: 123
+            
+security:
+  - BearerAuth: []

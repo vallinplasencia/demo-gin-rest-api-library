@@ -12,6 +12,8 @@ import (
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 
+const projectName string = "LIBRARY"
+
 // permissions permisos asignados a cada rol de usuario
 var permissions = map[apmodels.RoleType][]apmodels.PermissionType{}
 
