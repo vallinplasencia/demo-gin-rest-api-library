@@ -10,9 +10,11 @@ type BooksRepo interface {
 	Add(d *apmodelsv1.Book) (string, error)
 	// Edit update a item
 	Edit(d *apmodelsv1.Book) error
-
 	// FindBook find a book by id
 	Find(id string) (*apmodelsv1.Book, error)
+	// Remove delete item by id
+	Remove(id string) error
+
 	// FindBookSimple find a book by id con su categoria
 	FindBookSimple(id string) (*apmodelsv1.BookSimple, error)
 

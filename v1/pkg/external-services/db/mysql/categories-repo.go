@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"strconv"
 
 	"database/sql"
@@ -16,7 +17,8 @@ type categoriesRepo struct {
 
 // Add add a new item
 func (r *categoriesRepo) Add(d *apmodelsv1.Category) (string, error) {
-	result, e := r.db.Exec("INSERT INTO categories (name, description, created_at,updated_at) VALUES (?,?,?,?)", d.Name, d.Description, d.CreatedAt, d.UpdatedAt)
+	q := fmt.Sprintf("INSERT INTO %s (name, description, created_at,updated_at) VALUES (?,?,?,?)", categoriesTable)
+	result, e := r.db.Exec(q, d.Name, d.Description, d.CreatedAt, d.UpdatedAt)
 	if e != nil {
 		return "", e
 	}
@@ -29,7 +31,8 @@ func (r *categoriesRepo) Add(d *apmodelsv1.Category) (string, error) {
 
 // Find find a category by id
 func (r *categoriesRepo) Find(id string) (*apmodelsv1.Category, error) {
-	row := r.db.QueryRow("SELECT id,name,description,created_at,updated_at FROM categories WHERE id=?", id)
+	q := fmt.Sprintf("SELECT id,name,description,created_at,updated_at FROM %s WHERE id=?", categoriesTable)
+	row := r.db.QueryRow(q, id)
 	var c apmodelsv1.Category
 	switch e := row.Scan(
 		&c.ID,

@@ -54,6 +54,7 @@ const (
 	// === books === //
 	PermissionAddBook
 	PermissionEditBook
+	PermissionDeleteBook
 	PermissionRetrieveBook
 	PermissionListBooks
 )

@@ -39,5 +39,6 @@ func (r *Router) initV1Routers() {
 		apiv1.GET("/books", r.H.Books.GetListBooks)
 		apiv1.GET("/books/:id", r.H.Books.GetRetrieveBook)
 		apiv1.PUT("/books/:id", r.H.Books.PutEditBook)
+		apiv1.DELETE("/books/:id", r.H.Books.DeleteBook)
 	}
 }

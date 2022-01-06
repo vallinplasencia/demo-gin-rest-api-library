@@ -188,6 +188,35 @@ func (h *BookHandler) GetListBooks(c *gin.Context) {
 	resp.sendOK(h.toRespBooksSimpleFromDB(item), nil, false)
 }
 
+// DeleteBook remove book
+func (h *BookHandler) DeleteBook(c *gin.Context) {
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionDeleteBook) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, errorUnauthorized, nil, true)
+		return
+	}
+	item, e := h.db.Books().FindBookSimple(c.Param("id"))
+	if e != nil {
+		if e == apdbabstract.ErrorNoItems {
+			resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, nil, true)
+			return
+		}
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+		return
+	}
+	// check owner book
+	if item.UserID != u.UserID {
+		resp.sendNotFound(aphv1resp.CodeNotFoundBook, e, nil, true)
+		return
+	}
+	e = h.db.Books().Remove(item.ID)
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+		return
+	}
+	resp.sendOK(struct{}{}, nil, false)
+}
+
 // === conv from request === //
 
 func (h *BookHandler) toModelBookFromRequest(d *aphv1req.CreateBook, userID string) *apv1models.Book {

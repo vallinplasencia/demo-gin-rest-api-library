@@ -49,6 +49,13 @@ func (r *booksRepo) Edit(d *apmodelsv1.Book) error {
 	return nil
 }
 
+// Remove delete item by id
+func (r *booksRepo) Remove(id string) error {
+	q := fmt.Sprintf("DELETE FROM %s WHERE id=?", booksTable)
+	_, e := r.db.Exec(q, id)
+	return e
+}
+
 // Find find a book by id
 func (r *booksRepo) Find(id string) (*apmodelsv1.Book, error) {
 	q := fmt.Sprintf(`SELECT 

@@ -25,7 +25,7 @@ func init() {
 		apmodels.PermissionCreateAccount, apmodels.PermissionLogin, apmodels.PermissionGenerateAccessToken,
 	}
 	users := []apmodels.PermissionType{
-		apmodels.PermissionAddBook, apmodels.PermissionRetrieveBook, apmodels.PermissionEditBook, apmodels.PermissionListBooks, apmodels.PermissionGenerateAccessToken,
+		apmodels.PermissionAddBook, apmodels.PermissionRetrieveBook, apmodels.PermissionEditBook, apmodels.PermissionDeleteBook, apmodels.PermissionListBooks, apmodels.PermissionGenerateAccessToken,
 	}
 	admin := []apmodels.PermissionType{}
 	permissions = map[apmodels.RoleType][]apmodels.PermissionType{

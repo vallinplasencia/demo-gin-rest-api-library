@@ -31,7 +31,7 @@ func (r *sessionsRepo) Add(d *apmodelsv1.Session) (string, error) {
 
 // Remove delete item by id
 func (r *sessionsRepo) Remove(id string) error {
-	q := fmt.Sprintf("DELETE FROM %s WHERE id=?", booksTable)
+	q := fmt.Sprintf("DELETE FROM %s WHERE id=?", sessionsTable)
 	_, e := r.db.Exec(q, id)
 	return e
 }

@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -15,7 +14,6 @@ func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		for k, v := range headers {
 			c.Writer.Header().Set(k, v)
-			fmt.Println(k, v)
 		}
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(200)
@@ -34,7 +32,7 @@ func init() {
 	// default headers cors allow
 	headers["Access-Control-Allow-Origin"] = "*"
 	headers["Access-Control-Allow-Methods"] = "POST, GET, PUT, DELETE, UPDATE"
-	headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Accept-Encoding, Authorization"
+	headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Accept-Encoding, Authorization, Accept"
 
 	if v := c.AccessControlAllowOrigin; len(v) > 0 {
 		headers["Access-Control-Allow-Origin"] = v
