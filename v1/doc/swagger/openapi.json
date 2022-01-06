@@ -171,18 +171,52 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "access-token": {
+                    "id": {
                       "type": "string",
-                      "description": "Access token with format jwt."
+                      "description": "User id."
                     },
-                    "refresh-token": {
+                    "auth_two_factor": {
+                      "type": "boolean",
+                      "description": "Si esta activado la autenticacion por dos factores."
+                    },
+                    "fullname": {
                       "type": "string",
-                      "description": "Refresh token para generar un nuevo access token."
+                      "maxLength": 150,
+                      "description": "User fullname."
+                    },
+                    "avatar": {
+                      "type": "string",
+                      "description": "Absolute url of avatar."
+                    },
+                    "device_id": {
+                      "type": "string",
+                      "description": "id of device generate random."
+                    },
+                    "token": {
+                      "type": "object",
+                      "properties": {
+                        "access-token": {
+                          "type": "string",
+                          "description": "Access token with format jwt."
+                        },
+                        "refresh-token": {
+                          "type": "string",
+                          "description": "Refresh token para generar un nuevo access token.",
+                          "maxLength": 500
+                        }
+                      }
                     }
                   },
                   "example": {
-                    "access-token": "jwt",
-                    "refresh-token": "token"
+                    "id": 123,
+                    "auth_two_factor": false,
+                    "fullname": "Pepe Perez",
+                    "avatar": "https://server.com/path/image.jpg",
+                    "device_id": 234,
+                    "token": {
+                      "access-token": "jwt",
+                      "refresh-token": "token"
+                    }
                   }
                 }
               }
@@ -206,9 +240,10 @@
         }
       }
     },
-    "/refesh-token": {
+    "/generate-access-token": {
       "post": {
         "summary": "Generate a new access-token.",
+        "security": [],
         "tags": [
           "accounts"
         ],
@@ -220,17 +255,30 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "refresh-token": {
+                  "refresh_token": {
                     "type": "string",
                     "description": "Refresh token para generar un nuevo access token.",
                     "maxLength": 500
+                  },
+                  "old_access_token": {
+                    "type": "string",
+                    "description": "Old access token."
+                  },
+                  "device-id": {
+                    "type": "string",
+                    "description": "Device id.",
+                    "maxLength": 100
                   }
                 },
                 "example": {
-                  "refresh-token": "token"
+                  "refresh_token": "token",
+                  "old_access_token": "oldjwt",
+                  "device_id": "123"
                 },
                 "required": [
-                  "refresh-token"
+                  "refresh-token",
+                  "old_access_token",
+                  "device_id"
                 ]
               }
             }

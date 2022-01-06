@@ -11,20 +11,17 @@ type CreateAccount struct {
 	Avatar   *multipart.FileHeader `form:"avatar" binding:"required"`
 }
 
-// // CreateAccount ...
-// type CreateAccount struct {
-// 	Fullname string     `json:"fullname" binding:"required"`
-// 	Email    string     `json:"email" binding:"required"`
-// 	Username string     `json:"username" binding:"required"`
-// 	Password string     `json:"password" binding:"required"`
-// 	Gender   GenderType `json:"gender" binding:"required"`
-// 	Avatar   string     `json:"avatar"`
-// }
-
 // Login ...
 type Login struct {
 	UsernameOrEmail string `json:"username_or_email" binding:"required"`
 	Password        string `json:"password" binding:"required"`
+}
+
+// GenerateAccessToken ...
+type GenerateAccessToken struct {
+	RefreshToken   string `json:"refresh_token"`
+	OldAccessToken string `json:"old_access_token"`
+	DeviceID       string `json:"device_id"`
 }
 
 // === types === //

@@ -169,8 +169,99 @@ func (h *AccountsHandler) PostLogin(c *gin.Context) {
 		AuthTwoFactor: false,
 		Token:         &aphv1resp.Token{AccessToken: token.AccessToken, RefreshToken: token.RefreshToken},
 		Fullname:      acc.Fullname,
-		Avatar:        acc.Avatar,
+		Avatar:        h.fullURLMedia(acc.Avatar),
 		DeviceID:      deviceID,
+	}, nil, false)
+}
+
+// PostGenerateAccessToken genera un nuevo access token valido
+func (h *AccountsHandler) PostGenerateAccessToken(c *gin.Context) {
+	resp, u := response{c: c, env: h.env}, h.getUser(c)
+	if !h.authorize(u, apmodels.PermissionGenerateAccessToken) {
+		resp.send(http.StatusForbidden, aphv1resp.CodeUnauthorized, errorUnauthorized, nil, true)
+		return
+	}
+	var e error
+	b := aphv1req.GenerateAccessToken{}
+
+	if e = c.ShouldBindWith(&b, binding.JSON); e != nil {
+		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, nil, true)
+		return
+	}
+	uClaimToken, e := h.token.DecodeYetInvalid(b.OldAccessToken) // parser old access token
+	if e != nil || uClaimToken == nil || len(uClaimToken.Id) == 0 {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+		return
+	}
+	ses, e := h.db.Sessions().FindByRefreshToken(b.RefreshToken)
+	if e != nil {
+		if e == apdbabstract.ErrorNoItems { // not found session by refresh token
+			resp.sendNotFound(aphv1resp.CodeNotFoundUser, e, nil, true)
+			return
+		} else {
+			resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+			return
+		}
+	}
+	ua := parseUserAgent(c.Request.UserAgent())
+	now := time.Now().UTC().Unix()
+
+	// check data session associated with the refresh token
+
+	if now-ses.CreatedAt > h.token.GetLiveRefreshToken() { // Comprobando el refresh token sea valido
+		_ = h.db.Sessions().Remove(ses.ID)
+		resp.send(http.StatusUnauthorized, aphv1resp.CodeExpiredRefreshToken, errorExpiredRefreshToken, nil, true)
+		return
+	}
+	if ses.DeviceID != b.DeviceID {
+		_ = h.db.Sessions().Remove(ses.ID)
+		resp.send(http.StatusUnauthorized, aphv1resp.CodeInvalidSessionDataOfRefreshToken, errorInvalidSessionDataOfRefreshToken, nil, true)
+		return
+	}
+	if ses.Platform != ua.OS {
+		_ = h.db.Sessions().Remove(ses.ID)
+		resp.send(http.StatusUnauthorized, aphv1resp.CodeInvalidSessionDataOfRefreshToken, errorInvalidSessionDataOfRefreshToken, nil, true)
+		return
+	}
+	if ses.UserAgent != ua.Name {
+		_ = h.db.Sessions().Remove(ses.ID)
+		resp.send(http.StatusUnauthorized, aphv1resp.CodeInvalidSessionDataOfRefreshToken, errorInvalidSessionDataOfRefreshToken, nil, true)
+		return
+	}
+	uToken, e := h.db.Accounts().Find(uClaimToken.UserID)
+	if e != nil {
+		if e == apdbabstract.ErrorNoItems { // not found user of old access token
+			resp.sendNotFound(aphv1resp.CodeNotFoundUser, e, nil, true)
+			return
+		} else {
+			resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+			return
+		}
+	}
+	if uToken.ID != ses.UserID { // check session is of user on old access token
+		resp.sendBadRequest(aphv1resp.CodeInvalidArgument, e, nil, true)
+		return
+	}
+	// generate new access token
+	t, e := h.token.Create(&apmodels.AuthUser{
+		UserID:      uToken.ID,
+		Fullname:    uToken.Fullname,
+		Username:    uToken.Username,
+		Roles:       uToken.Roles,
+		Permissions: apauth.GetPermissions(uToken.Roles),
+		Avatar:      uToken.Avatar,
+	})
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+		return
+	}
+	e = h.db.Sessions().EditLastAccessTokenGenerated(ses.ID, now)
+	if e != nil {
+		resp.sendInternalError(aphv1resp.CodeInternalError, e, nil, true)
+		return
+	}
+	resp.sendOK(&aphv1resp.GenerateAccessToken{
+		AccessToken: t.AccessToken,
 	}, nil, false)
 }
 

@@ -12,14 +12,18 @@ import (
 
 // === errors === //
 
-// errorRespIsEmpty  respuesta de un sevicio externo esta vacia
-var errorRespIsEmpty error = errors.New("response is nil")
-
-// errorUnauthorized usuario no tiene permiso para acceder a un recurso
-var errorUnauthorized error = errors.New("user does not have permission")
-
-// errorFieldNotSort no se permite ordenar por ese campo
-var errorFieldNotSort error = errors.New("field no sort")
+var (
+	// errorRespIsEmpty external service response is empty
+	errorRespIsEmpty error = errors.New("response is nil")
+	// errorUnauthorized user not have permisssion to a resource
+	errorUnauthorized error = errors.New("user does not have permission")
+	// errorFieldNotSort not sort by field
+	errorFieldNotSort error = errors.New("field no sort")
+	// errorExpiredRefreshToken expired refresh token
+	errorExpiredRefreshToken error = errors.New("refresh token expired")
+	// errorInvalidSessionDataOfRefreshToken session data asociated with the refresh token is invalid. Ex: diferente platform, ...
+	errorInvalidSessionDataOfRefreshToken error = errors.New("session data of refresh token is/are invalid")
+)
 
 // === concurrency === //
 const (
@@ -39,8 +43,6 @@ const (
 const (
 	// avatarDirectoryIn directorio interno donde se suben los avatars
 	avatarDirectoryIn string = "xxxvvv/media/avatars"
-	// keyAuthUser clave para obtener el usuario logueado en el contexto de Gin
-	keyAuthUser string = "user"
 )
 
 // === db util === //

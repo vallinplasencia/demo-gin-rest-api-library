@@ -17,10 +17,11 @@ type Handlers struct {
 
 func New(c *config, db apdbabstract.DB, authToken apauthtokenabstract.Token, store apstoreabstract.Store) *Handlers {
 	base := &base{
-		db:         db,
-		env:        c.Env,
-		token:      authToken,
-		storeFiles: store,
+		db:                   db,
+		env:                  c.Env,
+		token:                authToken,
+		storeFiles:           store,
+		urlServerStoreMedias: c.URLServerStoreMedias,
 	}
 	books := &BookHandler{
 		base: base,
@@ -38,17 +39,22 @@ func New(c *config, db apdbabstract.DB, authToken apauthtokenabstract.Token, sto
 
 type config struct {
 	Env aputil.EnvType
+	// URLServerStoreMedias url del servidor donde se alojan los archivos subidos
+	URLServerStoreMedias string
 }
 
 // ConfigFromEnv ...
 func ConfigFromEnv(prefix string) (*config, error) {
 	temp := struct {
 		Env string `envconfig:"APP_MODE"`
+		// URLServerStoreMedias url del servidor donde se alojan los archivos subidos
+		URLServerStoreMedias string `envconfig:"URL_SERVER_STORE_MEDIAS"`
 	}{}
 	e := envconfig.Process(prefix, &temp)
 
 	conf := config{
-		Env: aputil.EnvProduction,
+		Env:                  aputil.EnvProduction,
+		URLServerStoreMedias: temp.URLServerStoreMedias,
 	}
 	switch temp.Env {
 	case string(aputil.EnvProduction):

@@ -19,7 +19,8 @@ import (
 
 // Base ...
 type base struct {
-	env aputil.EnvType
+	env                  aputil.EnvType
+	urlServerStoreMedias string
 
 	// === external services === //
 
@@ -97,4 +98,16 @@ func (b *base) getUser(c *gin.Context) *apmodels.AuthUser {
 // authorize returna true si el usuario logueado tiene permiso para acceder al recurso de la peticion
 func (b *base) authorize(u *apmodels.AuthUser, searchPerm apmodels.PermissionType) bool {
 	return u.ContainRermission(searchPerm)
+}
+
+// fullURLMedia retorna la url completa de un archivo q esta almacenado en el servidor de archivos subidos
+func (b *base) fullURLMedia(path string) string {
+	if len(path) == 0 || strings.HasPrefix(path, "http") {
+		return path
+	}
+	dom := strings.TrimSuffix(b.urlServerStoreMedias, "/")
+	if strings.HasPrefix(path, "/") {
+		return fmt.Sprintf("%s%s", dom, path)
+	}
+	return fmt.Sprintf("%s/%s", dom, path)
 }

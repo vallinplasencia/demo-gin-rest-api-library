@@ -21,8 +21,10 @@ type Token interface {
 	Create(u *apmodels.AuthUser) (*TokenDetails, error)
 	// // Decode retorna los datos del usuario a partir de un token
 	Decode(token string) (*UserClaims, error)
-	// // DecodeYetInvalid retorna los datos del usuario a partir de un token aun estando el token invalido.
-	// DecodeYetInvalid(tokenStr string) (*UserClaims, error)
+	// DecodeYetInvalid retorna los datos del usuario a partir de un token aunque el token sea invalido.
+	DecodeYetInvalid(tokenStr string) (*UserClaims, error)
+	// GetLiveRefreshToken retorna la cantidad de segundos q es valido el refresh token
+	GetLiveRefreshToken() int64
 }
 
 // UserClaims datos q vienen en el token

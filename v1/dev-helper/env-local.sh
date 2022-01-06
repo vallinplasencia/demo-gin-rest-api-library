@@ -2,6 +2,7 @@
 
 export GIN_MODE=debug
 export LIBRARY_APP_MODE="develop"
+export LIBRARY_URL_SERVER_STORE_MEDIAS="https://xxxx.com"
 
 # file logs
 # export LIBRARY_PATH_FILE_LOGS="../gitignore/logs/all.log"

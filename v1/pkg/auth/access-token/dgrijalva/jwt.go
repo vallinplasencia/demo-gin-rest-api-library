@@ -104,13 +104,10 @@ func (t *token) Decode(tokenStr string) (*apauthabstract.UserClaims, error) {
 	return nil, apauthabstract.ErrInvalidToken
 }
 
-// DecodeYetInvalid retorna los datos del usuario a partir de un token aun estando el token invalido.
-//
-//
+// DecodeYetInvalid retorna los datos del usuario a partir de un token aunque el token sea invalido.
 func (t *token) DecodeYetInvalid(tokenStr string) (*apauthabstract.UserClaims, error) {
 	token, e := jwt.ParseWithClaims(tokenStr, &apauthabstract.UserClaims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			// alg := fmt.Sprint(token.Header["alg"])
 			return nil, apauthabstract.ErrUnexpectedSigningMethod
 		}
 		return []byte(t.accessTokenSecretKey), nil
@@ -127,6 +124,11 @@ func (t *token) DecodeYetInvalid(tokenStr string) (*apauthabstract.UserClaims, e
 		}
 	}
 	return nil, e
+}
+
+// GetLiveRefreshToken retorna la cantidad de segundos q es valido el refresh token
+func (t *token) GetLiveRefreshToken() int64 {
+	return t.refreshTokenLive
 }
 
 // IsErrorTokenExpired retorna true si el error es por causa de q el token ya expiro

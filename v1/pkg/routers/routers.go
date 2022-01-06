@@ -23,14 +23,17 @@ func (r *Router) InitRouters() {
 
 // initV1Routers set endpoints with yours handlers
 func (r *Router) initV1Routers() {
+	// middleware for cors
 	r.Eng.Use(apmiddlewares.Cors())
 
 	apiv1 := r.Eng.Group("/api/v1")
-	// middlewares
+	// middleware for authorization
 	apiv1.Use(apmiddlewares.AuthJwt(r.Token))
+
 	{
 		apiv1.POST("/accounts", r.H.Accounts.PostCreateAccount)
 		apiv1.POST("/login", r.H.Accounts.PostLogin)
+		apiv1.POST("/generate-access-token", r.H.Accounts.PostGenerateAccessToken)
 
 		apiv1.POST("/books", r.H.Books.PostAddBook)
 		apiv1.GET("/books", r.H.Books.GetListBooks)

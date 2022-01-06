@@ -49,6 +49,7 @@ const (
 	// === accounts === //
 	PermissionCreateAccount PermissionType = iota + 1
 	PermissionLogin
+	PermissionGenerateAccessToken
 
 	// === books === //
 	PermissionAddBook

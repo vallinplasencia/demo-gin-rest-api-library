@@ -14,28 +14,37 @@ const (
 	CodeInternalError
 	CodeInvalidArgument
 	CodeNotFoundCategory
+	// CodeConflictEmail email exist
 	CodeConflictEmail
+	// CodeConflictUsername username exist
 	CodeConflictUsername
 	CodeNotFoundUser
 	CodeIncorrectPassword
+	// CodeInvalidAuthToken jwt invalid
 	CodeInvalidAuthToken
 	CodeUnauthorized
 	CodeNotFoundBook
+	// CodeExpiredRefreshToken expired refresh token
+	CodeExpiredRefreshToken
+	// CodeInvalidSessionDataOfRefreshToken session data asociated with the refresh token is invalid. Ex: diferente platform, ...
+	CodeInvalidSessionDataOfRefreshToken
 )
 
 var msgs = map[CodeType]string{
-	CodeIndeterminate:     "",
-	CodeOK:                "ok",
-	CodeInternalError:     "internal error",
-	CodeInvalidArgument:   "invalid arguments",
-	CodeNotFoundCategory:  "category not found",
-	CodeConflictEmail:     "email exist",
-	CodeConflictUsername:  "username exist",
-	CodeNotFoundUser:      "user not found",
-	CodeIncorrectPassword: "password incorrect",
-	CodeInvalidAuthToken:  "invalid token auth",
-	CodeUnauthorized:      "unauthorized",
-	CodeNotFoundBook:      "book not found",
+	CodeIndeterminate:                    "",
+	CodeOK:                               "ok",
+	CodeInternalError:                    "internal error",
+	CodeInvalidArgument:                  "invalid arguments",
+	CodeNotFoundCategory:                 "category not found",
+	CodeConflictEmail:                    "email exist",
+	CodeConflictUsername:                 "username exist",
+	CodeNotFoundUser:                     "user not found",
+	CodeIncorrectPassword:                "password incorrect",
+	CodeInvalidAuthToken:                 "invalid token auth",
+	CodeUnauthorized:                     "unauthorized",
+	CodeNotFoundBook:                     "book not found",
+	CodeExpiredRefreshToken:              "refresh token expired",
+	CodeInvalidSessionDataOfRefreshToken: "session data associated with the refresh token is invalid",
 }
 
 // GetMsgError retorna el mensaje de error asociado al codigo

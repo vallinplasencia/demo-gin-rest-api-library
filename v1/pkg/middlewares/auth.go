@@ -7,15 +7,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	apauth "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth"
 	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
 	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 
 const projectName string = "LIBRARY"
-
-// permissions permisos asignados a cada rol de usuario
-var permissions = map[apmodels.RoleType][]apmodels.PermissionType{}
 
 // bearerSchema esquema bearer para la cabecera authorization
 const bearerSchema string = "Bearer "
@@ -42,15 +40,6 @@ func AuthJwt(t apauthtokenabstract.Token) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		getPermissions := func(roles []apmodels.RoleType) map[apmodels.PermissionType]bool {
-			perms := map[apmodels.PermissionType]bool{}
-			for _, v := range roles {
-				for _, v := range permissions[v] {
-					perms[v] = true
-				}
-			}
-			return perms
-		}
 		if len(authHeader.BearerToken) == 0 {
 			roles := []apmodels.RoleType{apmodels.RoleAnonymous}
 			user := &apmodels.AuthUser{
@@ -58,7 +47,7 @@ func AuthJwt(t apauthtokenabstract.Token) gin.HandlerFunc {
 				Fullname:    "",
 				Username:    "",
 				Roles:       roles,
-				Permissions: getPermissions(roles),
+				Permissions: apauth.GetPermissions(roles),
 				Avatar:      "",
 			}
 			c.Set(apmodels.KeyUserContext, user)
@@ -97,26 +86,9 @@ func AuthJwt(t apauthtokenabstract.Token) gin.HandlerFunc {
 			Username:    u.Username,
 			Roles:       roles,
 			Avatar:      u.Avatar,
-			Permissions: getPermissions(roles),
+			Permissions: apauth.GetPermissions(roles),
 		}
 		c.Set(apmodels.KeyUserContext, user)
 		c.Next()
-	}
-}
-
-func init() {
-	// === carga los permisos por roles === //
-
-	anonymous := []apmodels.PermissionType{
-		apmodels.PermissionCreateAccount, apmodels.PermissionLogin,
-	}
-	users := []apmodels.PermissionType{
-		apmodels.PermissionAddBook, apmodels.PermissionRetrieveBook, apmodels.PermissionEditBook, apmodels.PermissionListBooks,
-	}
-	admin := []apmodels.PermissionType{}
-	permissions = map[apmodels.RoleType][]apmodels.PermissionType{
-		apmodels.RoleUser:      users,
-		apmodels.RoleAnonymous: anonymous,
-		apmodels.RoleAdmin:     admin,
 	}
 }
