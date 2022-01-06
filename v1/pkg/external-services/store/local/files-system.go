@@ -18,7 +18,6 @@ type FilesSytem struct {
 
 // New ...
 func New(c *Config) (apstoreabstract.Store, error) {
-	fmt.Printf("SSS: %+v\n", c)
 	return &FilesSytem{
 		Directory: strings.TrimSuffix(c.DestinationTarget, string(os.PathSeparator)),
 	}, nil

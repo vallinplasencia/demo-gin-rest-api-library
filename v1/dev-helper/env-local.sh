@@ -2,7 +2,6 @@
 
 export GIN_MODE=debug
 export LIBRARY_APP_MODE="develop"
-export LIBRARY_URL_SERVER_STORE_MEDIAS="https://xxxx.com"
 
 # file logs
 # export LIBRARY_PATH_FILE_LOGS="../gitignore/logs/all.log"
@@ -29,10 +28,10 @@ export LIBRARY_ACCESS_TOKEN_LIVE="1420" # 7 minutos. Tiempo antes de expirar el 
 export LIBRARY_REFRESH_TOKEN_SECRET_KEY="1029azyb8374cwdv"
 export LIBRARY_REFRESH_TOKEN_LIVE="3196800" # 37 dias. Tiempo antes de expirar el token de refrescar el access token
 
+export LIBRARY_URL_SERVER_STORE_MEDIAS="http://gin-library-demo.local:8080/upload/media"
 # store uploaded files=> system-files local
 export LIBRARY_STORE_UPLOADED_FILES_MODE="files-system-local" # values: files-system-local or aws-s3
 export LIBRARY_DESTINATION_TARGET="../gitignore/store"
-
 # # store uploaded files=> aws-s3
 # export LIBRARY_STORE_UPLOADED_FILES_MODE="aws-s3" # values: files-system-local or aws-s3
 # export LIBRARY_DESTINATION_TARGET="cdn.goollodging.com"

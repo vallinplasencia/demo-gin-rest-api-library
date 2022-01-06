@@ -23,6 +23,7 @@ func (r *Router) InitRouters() {
 
 // initV1Routers set endpoints with yours handlers
 func (r *Router) initV1Routers() {
+	r.Eng.Static("/upload/media", "/media/vallin/data/Projects/Go/web/demo-gin-rest-api-library/v1/gitignore/store/")
 	// middleware for cors
 	r.Eng.Use(apmiddlewares.Cors())
 
@@ -38,7 +39,7 @@ func (r *Router) initV1Routers() {
 		apiv1.POST("/books", r.H.Books.PostAddBook)
 		apiv1.GET("/books", r.H.Books.GetListBooks)
 		apiv1.GET("/books/:id", r.H.Books.GetRetrieveBook)
-		apiv1.PUT("/books/:id", r.H.Books.PutEditBook)
+		apiv1.PUT("/books/:mid", r.H.Books.PutEditBook)
 		apiv1.DELETE("/books/:id", r.H.Books.DeleteBook)
 	}
 }
