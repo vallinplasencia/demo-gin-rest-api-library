@@ -6,7 +6,7 @@ import (
 	ua "github.com/mileusna/useragent"
 
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
-	aphv1req "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/req"
+	aphv1req "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/models/req"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
 )
 
@@ -42,7 +42,7 @@ const (
 
 const (
 	// avatarDirectoryIn directorio interno donde se suben los avatars
-	avatarDirectoryIn string = "xxxvvv/media/avatars"
+	avatarDirectoryIn string = "media/avatars"
 )
 
 // === db util === //

@@ -9,7 +9,7 @@ import (
 
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
-	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 
 // accountsRepo db access

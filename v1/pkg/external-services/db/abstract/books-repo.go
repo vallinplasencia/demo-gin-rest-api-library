@@ -1,7 +1,7 @@
 package abstract
 
 import (
-	apmodelsv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apmodelsv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 
 // BooksRepo db access

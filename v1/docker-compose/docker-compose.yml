@@ -1,0 +1,66 @@
+version: "3.3"
+
+networks:
+  dbMariaDB:
+  libraryDemo:
+
+services:
+  dbMariaDB:
+    image: mariadb:10.7.1
+    networks:
+      - dbMariaDB
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db-backup:/docker-entrypoint-initdb.d # load .sql. Populate db.
+      - ./db-conf/:/etc/mysql/conf.d/ # configuration for db
+    environment:
+      - MARIADB_USER=my-user
+      - MARIADB_PASSWORD=my-pass
+      - MARIADB_ROOT_PASSWORD=my-secret-pass
+      - MARIADB_DATABASE=library
+  library_demo:
+    image: vallinplasencia/demo-gin-rest-api-library:dev-xxx
+    depends_on:
+      - dbMariaDB
+    networks:
+      - libraryDemo
+      - dbMariaDB
+    ports:
+      - 8080:8080
+      - 4443:4443
+    volumes:
+      - ${LIBRARY_GITIGNORE}/certs:/certs
+      - ${LIBRARY_GITIGNORE}/store:/store
+      - ${LIBRARY_GITIGNORE}/logs:/logs
+    environment:
+      - GIN_MODE=debug
+      - LIBRARY_APP_MODE=develop      
+      - LIBRARY_PATH_FILE_LOGS=/logs/all.log # file logs
+      # http and https
+      - LIBRARY_ADDRESS_HTTP=:8080
+      - LIBRARY_ADDRESS_HTTPS=:4443
+      - LIBRARY_PATH_CERT_HTTPS=/certs/cert.pem
+      - LIBRARY_PATH_KEY_HTTPS=/certs/key.pem
+      - LIBRARY_READ_TIMEOUT=11
+      - LIBRARY_WRITE_TIMEOUT=11
+      # db
+      - LIBRARY_DB_MYSQL_USER=my-user
+      - LIBRARY_DB_MYSQL_PASSWORD=my-pass
+      - LIBRARY_DB_MYSQL_ADDRESS=dbMariaDB:3306
+      - LIBRARY_DB_MYSQL_DBNAME=library
+      # auth tokens
+      - LIBRARY_ACCESS_TOKEN_SECRET_KEY=1029azyb8374cwdv
+      - LIBRARY_ACCESS_TOKEN_AUDIENCE=https://*.library.com
+      - LIBRARY_ACCESS_TOKEN_ISSUER=https://www.library.com
+      - LIBRARY_ACCESS_TOKEN_LIVE=1420
+      - LIBRARY_REFRESH_TOKEN_SECRET_KEY=1029azyb8374cwdv
+      - LIBRARY_REFRESH_TOKEN_LIVE=3196800
+
+      - LIBRARY_URL_SERVER_STORE_MEDIAS=http://gin-library-demo.local:8080/upload/media
+      # store uploaded files=> system-files local
+      - LIBRARY_STORE_UPLOADED_FILES_MODE=files-system-local # values: files-system-local or aws-s3
+      - LIBRARY_DESTINATION_TARGET=/store
+      # # store uploaded files=> aws-s3
+      # - LIBRARY_STORE_UPLOADED_FILES_MODE=aws-s3 # values: files-system-local or aws-s3
+      # - LIBRARY_DESTINATION_TARGET=cdn.goollodging.com

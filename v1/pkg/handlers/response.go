@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
+	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/models/resp"
 	aputil "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/util"
 )
 

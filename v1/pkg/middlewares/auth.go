@@ -9,7 +9,7 @@ import (
 
 	apauth "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth"
 	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
-	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
+	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/models/resp"
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 

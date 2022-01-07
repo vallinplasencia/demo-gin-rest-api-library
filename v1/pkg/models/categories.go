@@ -1,4 +1,4 @@
-package v1
+package models
 
 // Category ...
 type Category struct {

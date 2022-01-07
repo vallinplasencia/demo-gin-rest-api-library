@@ -9,10 +9,10 @@ import (
 	"github.com/gin-gonic/gin/binding"
 
 	apdbabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/db/abstract"
-	aphv1req "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/req"
-	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1/models/resp"
+	aphv1req "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/models/req"
+	aphv1resp "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/models/resp"
 	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
-	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models/v1"
+	apv1models "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
 )
 
 // bookFieldType ...

@@ -23,20 +23,14 @@ type DB struct {
 }
 
 func New(c *config) (apdbabstract.DB, error) {
-	// cc := mysql.Config{
-	// 	User:                 c.User,
-	// 	Passwd:               c.Password,
-	// 	Net:                  "tcp",
-	// 	Addr:                 c.Address, // "127.0.0.1:3306"
-	// 	DBName:               c.DBName,
-	// 	AllowNativePasswords: true,
-	// }
-	cc := mysql.NewConfig()
-	cc.User = c.User
-	cc.Passwd = c.Password
-	cc.Addr = c.Address // "127.0.0.1:3306"
-	cc.DBName = c.DBName
-
+	cc := mysql.Config{
+		User:                 c.User,
+		Passwd:               c.Password,
+		Net:                  "tcp",
+		Addr:                 c.Address, // "127.0.0.1:3306"
+		DBName:               c.DBName,
+		AllowNativePasswords: true,
+	}
 	dba, e := sql.Open("mysql", cc.FormatDSN())
 	if e != nil {
 		return nil, e

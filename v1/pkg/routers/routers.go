@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	apauthtokenabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/auth/access-token/abstract"
-	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1"
+	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers"
 	apmiddlewares "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/middlewares"
 )
 
@@ -13,6 +13,9 @@ type Router struct {
 	Token apauthtokenabstract.Token
 	Eng   *gin.Engine
 	H     *aphandv1.Handlers
+
+	// UploadPath store uploaded files
+	UploadPath string
 }
 
 // InitRouters set endpoints with yours handlers
@@ -23,7 +26,7 @@ func (r *Router) InitRouters() {
 
 // initV1Routers set endpoints with yours handlers
 func (r *Router) initV1Routers() {
-	r.Eng.Static("/upload/media", "/media/vallin/data/Projects/Go/web/demo-gin-rest-api-library/v1/gitignore/store/")
+	r.Eng.Static("/upload/media", r.UploadPath)
 	// middleware for cors
 	r.Eng.Use(apmiddlewares.Cors())
 

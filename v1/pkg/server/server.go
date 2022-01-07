@@ -16,7 +16,7 @@ import (
 	apstoreabstract "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/abstract"
 	apstorelocalclient "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/local"
 	apstores3client "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/external-services/store/s3"
-	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers/v1"
+	aphandv1 "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/handlers"
 	aprouter "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/routers"
 )
 
@@ -50,6 +50,7 @@ func New() *Server {
 	token, e := apauthtoken.New(tokenConf)
 	we("unable configurate auth token", e)
 
+	uploadPath := ""
 	var storeFiles apstoreabstract.Store
 	if serverConf.StoreUploadedFilesMode == StoreAwsS3 {
 		// store upload files on aws-s3
@@ -63,6 +64,7 @@ func New() *Server {
 		we("unable read store files-system-local environment", e)
 		storeFiles, e = apstorelocalclient.New(storeLocalConf)
 		we("unable configurate store files-system-local client", e)
+		uploadPath = storeLocalConf.DestinationTarget
 	}
 	// handlers incoming request
 	handlersConf, e := aphandv1.ConfigFromEnv(projectName)
@@ -82,9 +84,10 @@ func New() *Server {
 
 	// ======= init routers with yours handlers ======= //
 	r := aprouter.Router{
-		Token: token,
-		Eng:   eng,
-		H:     handlers,
+		Token:      token,
+		Eng:        eng,
+		H:          handlers,
+		UploadPath: uploadPath,
 	}
 	r.InitRouters()
 

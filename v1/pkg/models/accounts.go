@@ -1,8 +1,4 @@
-package v1
-
-import (
-	apmodels "github.com/vallinplasencia/demo-gin-rest-api-library/v1/pkg/models"
-)
+package models
 
 // Account ...
 type Account struct {
@@ -11,7 +7,7 @@ type Account struct {
 	Email     string
 	Username  string
 	Password  string
-	Roles     []apmodels.RoleType
+	Roles     []RoleType
 	Avatar    string
 	CreatedAt int64
 	UpdatedAt int64
